@@ -3,6 +3,7 @@ setwd(".")
 # Software originally developed by Giuseppe Jurman <jurman@fbk.eu> on 1st March 2019
 # Edited by Davide Chicco <davide.chicco@gmail.com> on 4th March 2019
 
+# /usr/bin/Rscript biostatistics_analysis_tests_Shapiro_Wilcoxon_Kruskal_ChiSquared.r "../data/dataset_edited_without_time.csv" "death_event"
 
 # Data load
 
@@ -12,8 +13,12 @@ if(length(new.packages)) install.packages(new.packages)
 library("easypackages")
 libraries(list.of.packages)
 
+EXP_ARG_NUM <- 2
+
+LATEX_MODE <- FALSE
+
 args = commandArgs(trailingOnly=TRUE)
-if (length(args)<2) {
+if (length(args)<EXP_ARG_NUM) {
   stop("At least two argument must be supplied (input files)", call.=FALSE)
 } else {
   # default output file
@@ -108,6 +113,11 @@ EMPTY_END_OF_ROW <- ""
 
 SEP <- EMPTY_SEP
 END_OF_ROW <- EMPTY_END_OF_ROW
+
+if (LATEX_MODE == TRUE ) {
+    SEP <- LATEX_SEP
+    END_OF_ROW <- LATEX_END_OF_ROW
+}
 
 index <- 1
 cat("\n\t\t == Shapiro ==\n")

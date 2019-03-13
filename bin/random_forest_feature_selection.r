@@ -1,8 +1,11 @@
 setwd(".")
 options(stringsAsFactors = FALSE)
 
+EXP_ARG_NUM <- 2
+
+
 args = commandArgs(trailingOnly=TRUE)
-if (length(args)<2) {
+if (length(args)<EXP_ARG_NUM) {
   stop("At least two argument must be supplied (input files)", call.=FALSE)
 } else {
   # default output file
@@ -10,7 +13,10 @@ if (length(args)<2) {
   targetName <- args[2]
 }
 
-list.of.packages <- c("easypackages", "randomForest", "ggplot2")
+# fileNameData <-  "/home/davide/projects/breast_cancer_Coimbra/data/dataR2_EDITED.csv"
+# targetName <- "DIAGNOSIS"
+
+list.of.packages <- c("easypackages", "randomForest", "ggplot2", "dplyr")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 library("easypackages")
@@ -26,9 +32,13 @@ PLOT_DEPICTION <- FALSE
 patients_data <- read.csv(fileNameData, header = TRUE, sep =",");
 cat("Read data from file ", fileNameData, "\n", sep="")
 
+patients_data <- patients_data%>%select(-targetName,targetName)
+target_index <- dim(patients_data)[2]    
+
 num_to_return <- 1
 exe_num <- sample(1:as.numeric(Sys.time()), num_to_return)
 
+#allFeaturesFormula <- as.formula(paste(as.factor(colnames(patients_data)[target_index]), '.', sep=' ~ ' ))
 rf_output <- randomForest(as.factor(patients_data[, targetName]) ~ ., data=patients_data, importance=TRUE, proximity=TRUE)
 
 

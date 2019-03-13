@@ -6,13 +6,33 @@ source("./utils.r")
 # fileName <- "../data/dataset_edited_without_time.csv"
 # targetName <- "death_event"
 
+# /usr/bin/Rscript biostatistics_analysis_quant_description_Pearson_Student_pvalues.r "../data/dataset_edited_without_time.csv" "death_event"
+
+EXP_ARG_NUM <- 2
+
 args = commandArgs(trailingOnly=TRUE)
-if (length(args)<2) {
+if (length(args)<EXP_ARG_NUM) {
   stop("At least two argument must be supplied (input files)", call.=FALSE)
 } else {
   # default output file
   fileName <- args[1]
   targetName <- args[2]
+}
+
+LATEX_MODE <- FALSE
+
+LATEX_SEP <- "&"
+LATEX_END_OF_ROW <- "\\\\"
+
+EMPTY_SEP <- ""
+EMPTY_END_OF_ROW <- ""
+
+SEP <- EMPTY_SEP
+END_OF_ROW <- EMPTY_END_OF_ROW
+
+if (LATEX_MODE == TRUE ) {
+    SEP <- LATEX_SEP
+    END_OF_ROW <- LATEX_END_OF_ROW
 }
 
 cat("fileName: ", fileName, "\n", sep="")
@@ -56,9 +76,9 @@ for(i in 1:(ncol(patients_data))) {
         
         # cat(firstComponentName, "\t #\t %\n", sep="")
         cat("\t #\t %\n", sep="")
-        cat(firstComponentName, "\t ", firstComponentNum," & \t ", dec_two(firstComponentPerc),"\n", sep="")
+        cat(firstComponentName, "\t ", firstComponentNum," ", SEP," \t ", dec_two(firstComponentPerc),"\n", sep="")
         # cat(secondComponentName, "\t #\t %\n", sep="")
-        cat(secondComponentName, "\t ", secondComponentNum," & \t ", dec_two(secondComponentPerc),"\n;", sep="")
+        cat(secondComponentName, "\t ", secondComponentNum," ", SEP," \t ", dec_two(secondComponentPerc),"\n;", sep="")
         
     } else { 
     
@@ -104,9 +124,9 @@ for(i in 1:(ncol(patients_data_target_yes))) {
         
         # cat(firstComponentName, "\t #\t %\n", sep="")
         cat("\t #\t %\n", sep="")
-        cat(firstComponentName, "\t ", firstComponentNum," & \t ", dec_two(firstComponentPerc),"\n", sep="")
+        cat(firstComponentName, "\t ", firstComponentNum," ", SEP," \t ", dec_two(firstComponentPerc),"\n", sep="")
         # cat(secondComponentName, "\t #\t %\n", sep="")
-        cat(secondComponentName, "\t ", secondComponentNum," & \t ", dec_two(secondComponentPerc),"\n", sep="")
+        cat(secondComponentName, "\t ", secondComponentNum," ", SEP," \t ", dec_two(secondComponentPerc),"\n", sep="")
         
     } else { 
     
@@ -139,9 +159,9 @@ for(i in 1:(ncol(patients_data_target_no))) {
         
         # cat(firstComponentName, "\t #\t %\n", sep="")
         cat("\t #\t %\n", sep="")
-        cat(firstComponentName, "\t ", firstComponentNum," & \t ", dec_two(firstComponentPerc),"\n", sep="")
+        cat(firstComponentName, "\t ", firstComponentNum," ", SEP," \t ", dec_two(firstComponentPerc),"\n", sep="")
         # cat(secondComponentName, "\t #\t %\n", sep="")
-        cat(secondComponentName, "\t ", secondComponentNum," & \t ", dec_two(secondComponentPerc),"\n;", sep="")
+        cat(secondComponentName, "\t ", secondComponentNum," ", SEP," \t ", dec_two(secondComponentPerc),"\n;", sep="")
         
     } else { 
     
@@ -157,7 +177,7 @@ for(i in 1:(ncol(patients_data_target_no))) {
 if (ALL_PATIENTS_CORRELATION == TRUE) {
 
     cat("\n// all patients correlations //\n\n", sep="")
-    cat(targetName, ";\t abs(t); \t p-value; \t PCC; \t conf_int;\n\n", sep="")
+    cat(targetName, " ", SEP,"\\t abs(t) ", SEP,"\ \t p-value ", SEP," \t PCC ", SEP," \t conf_int ", SEP,"\n\n", sep="")
     for(i in 1:(ncol(patients_data))) { 
 
         # cat("\n\ncorrelation between (target) ", colnames(patients_data)[targetIndex], " and ",  colnames(patients_data)[i], ": \n", sep="") 
@@ -166,13 +186,13 @@ if (ALL_PATIENTS_CORRELATION == TRUE) {
         
         thisTtest <- t.test(patients_data[,i], patients_data[,targetIndex])
         tValue <- abs((thisTtest$statistic)[[1]])
-        pValue <- (thisTtest$p.value)
+        pValue <- dec_two(thisTtest$p.value)
         thisPCC <- cor(patients_data[,i], patients_data[,targetIndex], method=c("pearson"))
         conf_int_start <- dec_two((thisTtest$conf.int)[1])
         conf_int_end <- dec_two((thisTtest$conf.int)[2])
         
         # cat(colnames(patients_data)[i], "\t\t abs(t) \t p-value \t PCC \t conf_int\n", sep="")
-        cat(colnames(patients_data)[i], ";\t", dec_two(tValue), ";\t", pValue, ";\t", dec_two(thisPCC), ";\t", conf_int_start, ";\t", conf_int_end, ";\n", sep="")
+        cat(colnames(patients_data)[i], " ", SEP,"\t", dec_two(tValue), " ", SEP,"\t", pValue, " ", SEP,"\t", dec_two(thisPCC), " ", SEP,"\t", conf_int_start, " ", SEP,"\t", conf_int_end, " ", SEP,"\n", sep="")
         
         # cat("t = ", dec_two(tValue), "\n", sep="")
         # cat("p-value = ", dec_two(pValue), "\n", sep="")

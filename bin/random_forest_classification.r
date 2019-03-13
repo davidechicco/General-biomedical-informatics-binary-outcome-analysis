@@ -1,10 +1,11 @@
 setwd(".")
 options(stringsAsFactors = FALSE)
 
+EXP_ARG_NUM <- 2
 
 
 args = commandArgs(trailingOnly=TRUE)
-if (length(args)<2) {
+if (length(args)<EXP_ARG_NUM) {
   stop("At least two argument must be supplied (input files)", call.=FALSE)
 } else {
   # default output file
