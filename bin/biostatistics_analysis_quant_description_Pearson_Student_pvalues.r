@@ -6,18 +6,23 @@ source("./utils.r")
 # fileName <- "../data/dataset_edited_without_time.csv"
 # targetName <- "death_event"
 
+fileName <-  "/home/davide/projects/breast_cancer_Coimbra/data/dataR2_EDITED.csv"
+targetName <- "DIAGNOSIS"
+
 # /usr/bin/Rscript biostatistics_analysis_quant_description_Pearson_Student_pvalues.r "../data/dataset_edited_without_time.csv" "death_event"
 
 EXP_ARG_NUM <- 2
+MEDIAN_INDEX <- 3
+MEAN_INDEX <- 4
 
-args = commandArgs(trailingOnly=TRUE)
-if (length(args)<EXP_ARG_NUM) {
-  stop("At least two argument must be supplied (input files)", call.=FALSE)
-} else {
-  # default output file
-  fileName <- args[1]
-  targetName <- args[2]
-}
+# args = commandArgs(trailingOnly=TRUE)
+# if (length(args)<EXP_ARG_NUM) {
+#   stop("At least two argument must be supplied (input files)", call.=FALSE)
+# } else {
+#   # default output file
+#   fileName <- args[1]
+#   targetName <- args[2]
+# }
 
 LATEX_MODE <- FALSE
 
@@ -60,10 +65,14 @@ numPatients <- nrow(patients_data)
 # sort the columns alphabetically
 patients_data <- patients_data[ , order(names(patients_data))]
 
+binaryOrNonBinaryFeatures <- (apply(patients_data,2,function(x) { all(x %in% 0:1) }))
+binaryFeatures <-  names(binaryOrNonBinaryFeatures[binaryOrNonBinaryFeatures==TRUE])
+multiClassFeatures <-  names(binaryOrNonBinaryFeatures[binaryOrNonBinaryFeatures==FALSE])
+
 cat("\n// all patients //\n", sep="")
 for(i in 1:(ncol(patients_data))) { 
 
-    cat("\n\n", colnames(patients_data)[i], ": \n", sep="") 
+    cat("\n\n", colnames(patients_data)[i], " ", sep="") 
         if (dim(table(patients_data[,i]))==TWO_DIM) { # 2-dimensional
         
         firstComponentNum <- (table(patients_data[,i]))[[FIRST_COMP]]
@@ -76,18 +85,22 @@ for(i in 1:(ncol(patients_data))) {
         
         # cat(firstComponentName, "\t #\t %\n", sep="")
         cat("\t #\t %\n", sep="")
-        cat(firstComponentName, "\t ", firstComponentNum," ", SEP," \t ", dec_two(firstComponentPerc),"\n", sep="")
+        cat("\t", firstComponentName, "\t ", firstComponentNum," ", SEP," \t ", dec_two(firstComponentPerc),"\n", sep="")
         # cat(secondComponentName, "\t #\t %\n", sep="")
-        cat(secondComponentName, "\t ", secondComponentNum," ", SEP," \t ", dec_two(secondComponentPerc),"\n;", sep="")
+        cat("\t", secondComponentName, "\t ", secondComponentNum," ", SEP," \t ", dec_two(secondComponentPerc),"\n", sep="")
         
     } else { 
     
-        print(table(patients_data[,i])) 
+     
+        thisMedian <- summary(patients_data[,i])[[MEDIAN_INDEX]]
+        thisMean <- summary(patients_data[,i])[[MEAN_INDEX]]
+        cat("\tmedian \t mean\n", sep="")
+        cat(colnames(patients_data_target_no)[i], "\t", thisMedian, "\t", thisMean, "\n", sep="")
     
     }
     
     
-    print(summary(patients_data[,i])) 
+    # print(summary(patients_data[,i])) 
 
 }
 
@@ -107,10 +120,10 @@ patients_data_target_yes <- patients_data_target_yes[ , order(names(patients_dat
 
 numPatientsYes <- nrow(patients_data_target_yes)
 
-cat("\n// target YES patients //\n", sep="")
+cat("\n\n\n\n// target YES patients //\n", sep="")
 for(i in 1:(ncol(patients_data_target_yes))) { 
 
-    cat("\n\n", colnames(patients_data_target_yes)[i], ": \n", sep=""); 
+    cat("\n\n", colnames(patients_data_target_yes)[i], " ", sep=""); 
     
     if (dim(table(patients_data_target_yes[,i]))==TWO_DIM) { # 2-dimensional
         
@@ -124,17 +137,20 @@ for(i in 1:(ncol(patients_data_target_yes))) {
         
         # cat(firstComponentName, "\t #\t %\n", sep="")
         cat("\t #\t %\n", sep="")
-        cat(firstComponentName, "\t ", firstComponentNum," ", SEP," \t ", dec_two(firstComponentPerc),"\n", sep="")
+        cat("\t", firstComponentName, "\t ", firstComponentNum," ", SEP," \t ", dec_two(firstComponentPerc),"\n", sep="")
         # cat(secondComponentName, "\t #\t %\n", sep="")
-        cat(secondComponentName, "\t ", secondComponentNum," ", SEP," \t ", dec_two(secondComponentPerc),"\n", sep="")
+        cat("\t", secondComponentName, "\t ", secondComponentNum," ", SEP," \t ", dec_two(secondComponentPerc),"\n", sep="")
         
     } else { 
     
-        print(table(patients_data_target_yes[,i])) 
+        thisMedian <- summary(patients_data_target_yes[,i])[[MEDIAN_INDEX]]
+        thisMean <- summary(patients_data_target_yes[,i])[[MEAN_INDEX]]
+        cat("\tmedian \t mean\n", sep="")
+        cat(colnames(patients_data_target_no)[i], "\t", thisMedian, "\t", thisMean, "\n", sep="")
     
     }
     
-    print(summary(patients_data_target_yes[,i]))    
+    # print(summary(patients_data_target_yes[,i]))    
 }
 
 # patients NO
@@ -143,10 +159,10 @@ patients_data_target_no <- (patients_data[patients_data[, targetIndex]==targetNo
 patients_data_target_no<- patients_data_target_no[ , order(names(patients_data_target_no))]
 numPatientsNo <- nrow(patients_data_target_no)
 
-cat("\n// target NO patients //\n", sep="")
+cat("\n\n\n\n// target NO patients //\n", sep="")
 for(i in 1:(ncol(patients_data_target_no))) { 
 
-    cat("\n\n", colnames(patients_data_target_no)[i], ": \n", sep=""); 
+    cat("\n\n", colnames(patients_data_target_no)[i], " ", sep=""); 
     if (dim(table(patients_data_target_no[,i]))==TWO_DIM) { # 2-dimensional
         
         firstComponentNum <- (table(patients_data_target_no[,i]))[[FIRST_COMP]]
@@ -159,17 +175,19 @@ for(i in 1:(ncol(patients_data_target_no))) {
         
         # cat(firstComponentName, "\t #\t %\n", sep="")
         cat("\t #\t %\n", sep="")
-        cat(firstComponentName, "\t ", firstComponentNum," ", SEP," \t ", dec_two(firstComponentPerc),"\n", sep="")
+        cat("\t", firstComponentName, "\t ", firstComponentNum," ", SEP," \t ", dec_two(firstComponentPerc),"\n", sep="")
         # cat(secondComponentName, "\t #\t %\n", sep="")
-        cat(secondComponentName, "\t ", secondComponentNum," ", SEP," \t ", dec_two(secondComponentPerc),"\n;", sep="")
+        cat("\t", secondComponentName, "\t ", secondComponentNum," ", SEP," \t ", dec_two(secondComponentPerc),"\n", sep="")
         
     } else { 
     
-        print(table(patients_data_target_no[,i])) 
-    
+        thisMedian <- summary(patients_data_target_no[,i])[[MEDIAN_INDEX]]
+        thisMean <- summary(patients_data_target_no[,i])[[MEAN_INDEX]]
+        cat("\tmedian \t mean\n", sep="")
+        cat(colnames(patients_data_target_no)[i], "\t", thisMedian, "\t", thisMean, "\n", sep="")
     }
     
-    print(summary(patients_data_target_no[,i])) 
+    # print(summary(patients_data_target_no[,i])) 
 }
 
 # All patients: p-value, t-value, and PCC
@@ -177,7 +195,7 @@ for(i in 1:(ncol(patients_data_target_no))) {
 if (ALL_PATIENTS_CORRELATION == TRUE) {
 
     cat("\n// all patients correlations //\n\n", sep="")
-    cat(targetName, " ", SEP,"\\t abs(t) ", SEP,"\ \t p-value ", SEP," \t PCC ", SEP," \t conf_int ", SEP,"\n\n", sep="")
+    cat(targetName, " ", SEP,"\t abs(t) ", SEP,"\ \t p-value ", SEP," \t PCC ", SEP," \t conf_int ", SEP,"\n\n", sep="")
     for(i in 1:(ncol(patients_data))) { 
 
         # cat("\n\ncorrelation between (target) ", colnames(patients_data)[targetIndex], " and ",  colnames(patients_data)[i], ": \n", sep="") 
@@ -201,3 +219,6 @@ if (ALL_PATIENTS_CORRELATION == TRUE) {
     }
 
 }
+
+
+(t(summary(patients_data)))[,c(1,3,4,6)]
