@@ -52,7 +52,7 @@ patients_data_labels <- (patients_data[, target_index])
 num_folds <- 200
 num_feature <- c(ncol(patients_data))
 
-cat("SVM with radial kernel\n")
+cat("SVM linear\n")
 
 # svm for feature selection
 svmProfile <- rfe(patients_data, patients_data_labels,
