@@ -4,17 +4,20 @@ options(stringsAsFactors = FALSE)
 EXP_ARG_NUM <- 2
 
 
-args = commandArgs(trailingOnly=TRUE)
-if (length(args)<EXP_ARG_NUM) {
-  stop("At least two argument must be supplied (input files)", call.=FALSE)
-} else {
-  # default output file
-  fileNameData <- args[1]
-  targetName <- args[2]
-}
+# args = commandArgs(trailingOnly=TRUE)
+# if (length(args)<EXP_ARG_NUM) {
+#   stop("At least two argument must be supplied (input files)", call.=FALSE)
+# } else {
+#   # default output file
+#   fileNameData <- args[1]
+#   targetName <- args[2]
+# }
 
 # fileNameData <-  "/home/davide/projects/breast_cancer_Coimbra/data/dataR2_EDITED.csv"
 # targetName <- "DIAGNOSIS"
+
+fileNameData<- "../data/dataset_edited_without_time.csv"
+targetName <- "death_event"
 
 list.of.packages <- c("easypackages", "randomForest", "ggplot2", "dplyr")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
@@ -28,7 +31,7 @@ source("./utils.r")
 PLOT_DEPICTION <- FALSE
 
 
-# fileNameData<- "../data/dataset_edited_without_time.csv"
+
 patients_data <- read.csv(fileNameData, header = TRUE, sep =",");
 cat("Read data from file ", fileNameData, "\n", sep="")
 
@@ -94,6 +97,8 @@ lastCol <- dim(mergedRankingGeneralRank)[2]
 
 featuresCol <- 6
 
+rownames(mergedRankingGeneralRank) <- (removeUnderscore(rownames(mergedRankingGeneralRank)))
+mergedRankingGeneralRank$features <- removeUnderscore(mergedRankingGeneralRank$features)
 print(mergedRankingGeneralRank[,c(lastCol), drop=FALSE])
 
 if (PLOT_DEPICTION == TRUE) {
