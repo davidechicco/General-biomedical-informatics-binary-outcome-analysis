@@ -113,7 +113,7 @@ mcc <- function (actual, predicted)
   }
   mcc <- ((TP*TN)-(FP*FN)) / sqrt(denom)
   
-  cat("\nMCC = ", dec_two(mcc), "\n\n", sep="")
+  cat("\nMCC = ", (mcc), "\n\n", sep="")
   
   return(mcc)
 }

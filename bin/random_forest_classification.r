@@ -3,7 +3,8 @@ options(stringsAsFactors = FALSE)
 
 EXP_ARG_NUM <- 2
 
-fileName <-  "/home/davide/projects/breast_cancer_Coimbra/data/dataR2_EDITED.csv" targetName <- "DIAGNOSIS"
+fileName <-  "/home/davide/projects/breast_cancer_Coimbra/data/dataR2_EDITED.csv" 
+targetName <- "DIAGNOSIS"
 
 # args = commandArgs(trailingOnly=TRUE)
 # if (length(args)<EXP_ARG_NUM) {
@@ -39,11 +40,6 @@ NUM_METRICS <- 7
 confMatDataFrame <- matrix(ncol=NUM_METRICS, nrow=1)
 colnames(confMatDataFrame) <- c("MCC", "F1 score", "accuracy", "TP rate", "TN rate", "PR AUC", "ROC AUC")
 
-# args = commandArgs(trailingOnly=TRUE)
-# thisNtree <- as.integer(args[1])
-
-# thisNtree <- 5000
-
 threshold <- 0.5
 
 patients_data <- read.csv(file=fileName,head=TRUE,sep=",",stringsAsFactors=FALSE)
@@ -61,7 +57,7 @@ for(exe_i in 1:execution_number)
 {
 
     cat("[Randomizing the rows]\n")
-    patients_data <- patients_data_original[sample(nrow(patients_data_original)),] # shuffle the rows
+    patients_data <- patients_data[sample(nrow(patients_data)),] # shuffle the rows
 
     totalElements <- dim(patients_data)[1]
 
