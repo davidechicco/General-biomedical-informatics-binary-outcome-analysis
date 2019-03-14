@@ -3,24 +3,23 @@ options(stringsAsFactors = FALSE)
 
 EXP_ARG_NUM <- 2
 
+fileName <-  "/home/davide/projects/breast_cancer_Coimbra/data/dataR2_EDITED.csv" targetName <- "DIAGNOSIS"
 
-args = commandArgs(trailingOnly=TRUE)
-if (length(args)<EXP_ARG_NUM) {
-  stop("At least two argument must be supplied (input files)", call.=FALSE)
-} else {
-  # default output file
-  fileName <- args[1]
-  targetName <- args[2]
-}
+# args = commandArgs(trailingOnly=TRUE)
+# if (length(args)<EXP_ARG_NUM) {
+#   stop("At least two argument must be supplied (input files)", call.=FALSE)
+# } else {
+#   # default output file
+#   fileName <- args[1]
+#   targetName <- args[2]
+# }
+
 
 # fileName <- "../data/dataset_edited_without_time.csv"
 # targetName <- "death_event"
 
 # fileName <- "../../../projects/sepsis_severity_ICU/data/sepsis_severity_dataset_edited_2019-02-11.csv"
 # targetName <- "ADDED.survival"
-
-# fileName <-  "/home/davide/projects/breast_cancer_Coimbra/data/dataR2_EDITED.csv"
-# targetName <- "DIAGNOSIS"
 
 cat("fileName: ", fileName, "\n", sep="")
 cat("targetName: ", targetName, "\n", sep="")
