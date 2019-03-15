@@ -16,8 +16,11 @@ EXP_ARG_NUM <- 2
 # fileNameData <-  "/home/davide/projects/breast_cancer_Coimbra/data/dataR2_EDITED.csv"
 # targetName <- "DIAGNOSIS"
 
-fileNameData<- "../data/dataset_edited_without_time.csv"
-targetName <- "death_event"
+fileNameData <- "/home/davide/projects/mesothelioma_project/mesothelioma-diagnosis-predictions/Mesothelioma_data_set_33features.csv"
+targetName <- "class.of.diagnosis"
+
+# fileNameData<- "../data/dataset_edited_without_time.csv"
+# targetName <- "death_event"
 
 list.of.packages <- c("easypackages", "randomForest", "ggplot2", "dplyr")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
@@ -99,8 +102,8 @@ lastCol <- dim(mergedRankingGeneralRank)[2]
 
 featuresCol <- 6
 
-rownames(mergedRankingGeneralRank) <- (removeUnderscore(rownames(mergedRankingGeneralRank)))
-mergedRankingGeneralRank$features <- removeUnderscore(mergedRankingGeneralRank$features)
+rownames(mergedRankingGeneralRank) <- (removeDot(removeUnderscore(rownames(mergedRankingGeneralRank))))
+mergedRankingGeneralRank$features <- removeDot(removeUnderscore(mergedRankingGeneralRank$features))
 
 print(mergedRankingGeneralRank[, c("finalPos", "MeanDecreaseAccuracy", "MeanDecreaseGini"), drop=FALSE])
 
