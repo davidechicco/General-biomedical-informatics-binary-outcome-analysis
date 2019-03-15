@@ -28,7 +28,7 @@ patients_data <- read.csv(fileNameData, header = TRUE, sep =",");
 cat("Read data from file ", fileNameData, "\n", sep="")
 
 # put the target on the last right position
-patients_data <- patients_data%>%select(-targetName,targetName)
+patients_data <- patients_data%>%dplyr::select(-targetName,targetName)
 
 target_index <- dim(patients_data)[2]
 original_patients_data <- patients_data

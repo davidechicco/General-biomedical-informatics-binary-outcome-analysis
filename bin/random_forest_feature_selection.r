@@ -35,13 +35,15 @@ PLOT_DEPICTION <- FALSE
 patients_data <- read.csv(fileNameData, header = TRUE, sep =",");
 cat("Read data from file ", fileNameData, "\n", sep="")
 
-patients_data <- patients_data%>%select(-targetName,targetName)
+patients_data <- patients_data%>%dplyr::select(-targetName,targetName)
 target_index <- dim(patients_data)[2]    
 
 num_to_return <- 1
 exe_num <- sample(1:as.numeric(Sys.time()), num_to_return)
 
-#allFeaturesFormula <- as.formula(paste(as.factor(colnames(patients_data)[target_index]), '.', sep=' ~ ' ))
+# allFeaturesFormula <- as.formula(paste(as.factor(colnames(patients_data)[target_index]), '.', sep=' ~ ' ))
+# rf_output <- randomForest(allFeaturesFormula, data=patients_data, importance=TRUE, proximity=TRUE)
+
 rf_output <- randomForest(as.factor(patients_data[, targetName]) ~ ., data=patients_data, importance=TRUE, proximity=TRUE)
 
 
@@ -99,7 +101,12 @@ featuresCol <- 6
 
 rownames(mergedRankingGeneralRank) <- (removeUnderscore(rownames(mergedRankingGeneralRank)))
 mergedRankingGeneralRank$features <- removeUnderscore(mergedRankingGeneralRank$features)
-print(mergedRankingGeneralRank[,c(lastCol), drop=FALSE])
+
+print(mergedRankingGeneralRank[, c("finalPos", "MeanDecreaseAccuracy", "MeanDecreaseGini"), drop=FALSE])
+
+# alphabetical order
+# importanceFrameSorted[order(importanceFrameSorted$feature), ]
+
 
 if (PLOT_DEPICTION == TRUE) {
 
