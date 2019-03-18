@@ -8,6 +8,8 @@ setwd(".")
 filename <-  "/home/davide/projects/breast_cancer_Coimbra/data/dataR2_EDITED.csv"
 TARGET_LABEL <- "DIAGNOSIS"
 
+CORRELATIONS_PLOTS <- TRUE
+
 # Data load
 
 # list.of.packages <- c("readr", "easypackages")
@@ -38,7 +40,10 @@ cat("TARGET_LABEL: ", TARGET_LABEL, "\n", sep="")
 
 patients_dataset <- as.data.frame(read.csv(filename))
 # print(head(patients_dataset))
-
+source("utils.r")
+num_to_return <- 1
+upper_num_limit <- 10000000
+exe_num <- sample(1:upper_num_limit, num_to_return)
 
 ROUND_NUM <- 6
 
@@ -156,6 +161,39 @@ for(thecol in names(sortedVectorChi)) {
      index <- index + 1
 }
 
+# let's create the dataframes
 
+dataframeShapiro <- as.data.frame(sortedVectorShapiro)
+dataframeShapiro$pos <- c(1:dim(dataframeShapiro)[1])
+dataframeShapiro$feature <- rownames(dataframeShapiro)
 
-# print(alltests)
+dataframeWilkoxon <- as.data.frame(sortedVectorWilcoxon)
+dataframeWilkoxon$pos <- c(1:dim(dataframeWilkoxon)[1])
+dataframeWilkoxon$feature <- rownames(dataframeWilkoxon)
+
+dataframeKruskal <- as.data.frame(sortedVectorKruskal)
+dataframeKruskal$pos <- c(1:dim(dataframeKruskal)[1])
+dataframeKruskal$feature <- rownames(dataframeKruskal)
+
+dataframeChiSquared <- as.data.frame(sortedVectorChi)
+dataframeChiSquared$pos <- c(1:dim(dataframeChiSquared)[1])
+dataframeChiSquared$feature <- rownames(dataframeChiSquared)
+
+# let's create the plots
+
+if(CORRELATIONS_PLOTS == TRUE) {    
+    
+    x_upper_lim <- 300
+    barPlotOfRanking(dataframeShapiro, abs(log(dataframeShapiro$"sortedVectorShapiro")), dataframeShapiro$feature, dataframeShapiro$pos, exe_num, "feature", "abs(log(Shapiro-Wilk))", x_upper_lim)
+    
+    
+    x_upper_lim <- 1
+    barPlotOfRanking(dataframeWilkoxon, dataframeWilkoxon$"sortedVectorWilcoxon", dataframeWilkoxon$feature, dataframeWilkoxon$pos, exe_num, "feature", "Wilcoxon", x_upper_lim)
+    
+    x_upper_lim <- 1
+    barPlotOfRanking(dataframeKruskal, dataframeKruskal$"sortedVectorKruskal", dataframeKruskal$feature, dataframeKruskal$pos, exe_num, "feature", "Kruskal", x_upper_lim)
+    
+    x_upper_lim <- 1
+    barPlotOfRanking(dataframeChiSquared, dataframeChiSquared$"sortedVectorChi", dataframeChiSquared$feature, dataframeChiSquared$pos, exe_num, "feature", "ChiSquared", x_upper_lim)
+    
+}

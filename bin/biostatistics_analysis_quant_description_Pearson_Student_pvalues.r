@@ -9,6 +9,9 @@ source("./utils.r")
 fileName <-  "/home/davide/projects/breast_cancer_Coimbra/data/dataR2_EDITED.csv"
 targetName <- "DIAGNOSIS"
 
+ALL_PATIENTS_CORRELATION <- TRUE
+CORRELATIONS_PLOTS <- TRUE
+
 # /usr/bin/Rscript biostatistics_analysis_quant_description_Pearson_Student_pvalues.r "../data/dataset_edited_without_time.csv" "death_event"
 
 EXP_ARG_NUM <- 2
@@ -50,8 +53,6 @@ cat("targetName: ", targetName, "\n", sep="")
 
 patients_data <- read.csv(file=fileName,head=TRUE,sep=",",stringsAsFactors=FALSE)
 cat("fileName: ", fileName, "\n", sep="")
-
-ALL_PATIENTS_CORRELATION <- TRUE
 
 TWO_DIM <- 2
 FIRST_COMP <- 1
@@ -251,17 +252,20 @@ if (ALL_PATIENTS_CORRELATION == TRUE) {
     abs_t_Dataframe <- (allTestsDataframe[order(-allTestsDataframe$abs_t), c("abs_t"), drop=FALSE])
     abs_t_Dataframe$pos <- c(1:dim(abs_t_Dataframe)[1])
     abs_t_Dataframe$feature <- rownames(abs_t_Dataframe)
+    
+    if(CORRELATIONS_PLOTS == TRUE) {    
+    
+        x_upper_lim <- 1
+        barPlotOfRanking(absPCCresultDataframe, absPCCresultDataframe$abs_PCC, absPCCresultDataframe$feature, absPCCresultDataframe$pos, exe_num, "feature", "abs (PCC)", x_upper_lim)
+
+        x_upper_lim <- 300
+        barPlotOfRanking(p_values_resultDataframe, abs(log(p_values_resultDataframe$p)), p_values_resultDataframe$feature, (p_values_resultDataframe$pos), exe_num, "feature", "abs(log(p-value))", x_upper_lim)
+
+        x_upper_lim <- 100
+        barPlotOfRanking(abs_t_Dataframe, abs_t_Dataframe$abs_t, abs_t_Dataframe$feature, (abs_t_Dataframe$pos), exe_num, "feature", "Student's abs(t)", x_upper_lim)    
+    }
 
 }
-
-x_upper_lim <- 1
-barPlotOfRanking(absPCCresultDataframe, absPCCresultDataframe$abs_PCC, absPCCresultDataframe$feature, absPCCresultDataframe$pos, exe_num, "feature", "abs_PCC", x_upper_lim)
-
-x_upper_lim <- 300
-barPlotOfRanking(p_values_resultDataframe, abs(log(p_values_resultDataframe$p)), p_values_resultDataframe$feature, (p_values_resultDataframe$pos), exe_num, "feature", "p", x_upper_lim)
-
-x_upper_lim <- 100
-barPlotOfRanking(abs_t_Dataframe, abs_t_Dataframe$abs_t, abs_t_Dataframe$feature, (abs_t_Dataframe$pos), exe_num, "feature", "abs_t", x_upper_lim)
 
 
 # (t(summary(patients_data)))[,c(1,3,4,6)]
