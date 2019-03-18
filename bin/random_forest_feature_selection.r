@@ -17,11 +17,11 @@ agregateTwoSortedRankings <- function(dd, firstColumnName, secondColumnName) {
     # varImpPlot(rf_output)
     dd_sorted_firstColumn_only <- dd_sorted_firstColumn
     dd_sorted_firstColumn_only[[secondColumnName]] <- NULL # we do not need the other values
-    dd_sorted_firstColumn_only$secondColPos <- c(1:dim(dd_sorted_firstColumn_only)[1])
+    dd_sorted_firstColumn_only$firstColPos <- c(1:dim(dd_sorted_firstColumn_only)[1])
     
     dd_sorted_secondColumn_only <- dd_sorted_secondColumn
     dd_sorted_secondColumn_only[[firstColumnName]] <- NULL # we do not need the other values
-    dd_sorted_secondColumn_only$firstColPos <- c(1:dim(dd_sorted_secondColumn_only)[1])
+    dd_sorted_secondColumn_only$secondColPos <- c(1:dim(dd_sorted_secondColumn_only)[1])
 
     dd_sorted_firstColumn_only$features <- rownames(dd_sorted_firstColumn_only)
     dd_sorted_secondColumn_only$features <- rownames(dd_sorted_secondColumn_only)
@@ -39,6 +39,10 @@ agregateTwoSortedRankings <- function(dd, firstColumnName, secondColumnName) {
 
     mergedRankingGeneralRank <- mergedRankingAlphaBeta[order(mergedRankingAlphaBeta$"posSum"), ]
     mergedRankingGeneralRank$finalPos <- c(1:dim(mergedRankingGeneralRank)[1])
+    
+    # remove duplicate columns
+    temp <- mergedRankingGeneralRank[, !duplicated(colnames(mergedRankingGeneralRank))]
+    mergedRankingGeneralRank <- temp
 
     # print(mergedRankingGeneralRank)
     
@@ -58,11 +62,11 @@ agregateTwoSortedRankings <- function(dd, firstColumnName, secondColumnName) {
 #   targetName <- args[2]
 # }
 
-# fileNameData <-  "/home/davide/projects/breast_cancer_Coimbra/data/dataR2_EDITED.csv"
-# targetName <- "DIAGNOSIS"
+fileNameData <-  "/home/davide/projects/breast_cancer_Coimbra/data/dataR2_EDITED.csv"
+targetName <- "DIAGNOSIS"
 
-fileNameData <-  "/home/dave/cervical_cancer/cervical_arranged_NORM_ONLY_BIOPSY_TARGET.csv" 
-targetName <- "Biopsy"
+# fileNameData <-  "/home/dave/cervical_cancer/cervical_arranged_NORM_ONLY_BIOPSY_TARGET.csv" 
+# targetName <- "Biopsy"
 
 # fileNameData<- "../data/dataset_edited_without_time.csv"
 # targetName <- "death_event"
@@ -76,7 +80,8 @@ libraries(list.of.packages)
 source("./confusion_matrix_rates.r")
 source("./utils.r")
 
-PLOT_DEPICTION <- FALSE
+FEATURE_RANKING_PLOT_DEPICTION <- TRUE
+TWO_FEATURES_PLOT <- FALSE
 
 patients_data <- read.csv(fileNameData, header = TRUE, sep =",");
 cat("Read data from file ", fileNameData, "\n", sep="")
@@ -99,7 +104,7 @@ allExecutionsFinalRanking <- data.frame(Doubles=double(),
                  Characters=character(),
                  stringsAsFactors=FALSE)
 
-execution_number <- 10 
+execution_number <- 100 
 cat("Number of executions = ", execution_number, "\n", sep="")
 for(exe_i in 1:execution_number)
 {
@@ -110,8 +115,9 @@ for(exe_i in 1:execution_number)
 
 
     cat("application of randomForest()\n")
-    rf_output <- randomForest(as.factor(patients_data[, targetName]) ~ ., data=patients_data, importance=TRUE, proximity=TRUE)
-
+    rf_output <- randomForest(as.factor(patients_data[[targetName]]) ~ ., data=patients_data, importance=TRUE, proximity=TRUE)
+    # rf_output <- randomForest(as.factor(targetName) ~ ., data=patients_data, importance=TRUE, proximity=TRUE)
+    
 
     dd <- as.data.frame(rf_output$importance);
     
@@ -139,9 +145,15 @@ for(exe_i in 1:execution_number)
     }
 }
 
+
+
 allExecutionsFinalRanking$MeanDecreaseAccuracy <- allExecutionsFinalRanking$MeanDecreaseAccuracy / execution_number
 allExecutionsFinalRanking$MeanDecreaseGini <- allExecutionsFinalRanking$MeanDecreaseGini / execution_number
 allExecutionsFinalRanking$finalPos <- allExecutionsFinalRanking$finalPos / execution_number
+
+# let's eliminate the target index from the rank
+targetRow <-  which(allExecutionsFinalRanking==targetName)
+allExecutionsFinalRanking <- allExecutionsFinalRanking[-c( which(allExecutionsFinalRanking==targetName)), ]
 
 cat("\n\n\n\n== final ranking after ", execution_number, " executions == \n", sep="")
 
@@ -153,90 +165,38 @@ print(aggregateRankings[, c("finalPos", "MeanDecreaseAccuracy", "MeanDecreaseGin
 # aggregateRankings[c("features",  )
 
 
-if (PLOT_DEPICTION == TRUE) {
+if (FEATURE_RANKING_PLOT_DEPICTION == TRUE) {
+    
+        # print(colnames(dd_sorted_IncNodePurity_only))
 
-        library("ggplot2")
-        # Minimal theme + blue fill color
-
-       #print(colnames(dd_sorted_MSE_only))
+        mkdirResultsCommand <- "mkdir -p ../results"
+        system(mkdirResultsCommand)
+        cat("applied command: ", mkdirResultsCommand, "\n", sep="")
 
 
         pdfFileNameMSE <-  paste("../results/MSE_features_", exe_num, ".pdf", sep="")
         pdf(pdfFileNameMSE)
-        p <- ggplot(data=dd_sorted_MSE_only, aes(x=reorder(features, -msePos), y=MeanDecreaseAccuracy)) +  geom_bar(stat="identity", fill="steelblue")  + labs(title = "Feature importance on accuracy reduction", y = "accuracy reduction", x = "features")
+        p <- ggplot(data=aggregateRankings, aes(x=reorder(features, -firstColPos), y=MeanDecreaseAccuracy)) +  geom_bar(stat="identity", fill="steelblue")  + labs(title = "Feature importance on accuracy reduction", y = "accuracy reduction", x = "features")
         p <- p + coord_flip()
         plot(p)
+        cat("saved plot in file ", pdfFileNameMSE, "\n", sep="")
         dev.off()
-
-    
+            
         # print(colnames(dd_sorted_IncNodePurity_only))
 
         pdfFileNameGini <-  paste("../results/Gini_features_", exe_num, ".pdf", sep="")
         pdf(pdfFileNameGini)
-        p <- ggplot(data=dd_sorted_IncNodePurity_only, aes(x=reorder(features, -purityPos), y=MeanDecreaseGini)) +  geom_bar(stat="identity", fill="steelblue")  + labs(title = "Feature importance on Gini impurity", y = "Gini impurity", x = "features")
+        p <- ggplot(data=aggregateRankings, aes(x=reorder(features, -secondColPos), y=MeanDecreaseGini)) +  geom_bar(stat="identity", fill="steelblue")  + labs(title = "Feature importance on Gini impurity", y = "Gini impurity", x = "features")
         p <- p + coord_flip()
         plot(p)
+        cat("saved plot in file ", pdfFileNameGini, "\n", sep="")
         dev.off()
+}
         
-        pdfFile_plot_death_serum_creatinine <- paste("../results/plot_death_VS_serum_creatinine_NORM_", exe_num, ".pdf", sep="")
-        pdf(pdfFile_plot_death_serum_creatinine)
-        plot_death_serum_creatinine <-  cdplot(factor(patients_data[, targetName], labels=c("survived", "dead")) ~ serum_creatinine, data=patients_data, ylab = NA, xlab="serum creatinine")
-        # plot(plot_death_serum_creatinine)
-        dev.off()
-       
-
-        pdfFile_plot_death_ejection_fraction <- paste("../results/plot_death_VS_ejection_fraction_NORM_", exe_num, ".pdf", sep="")
-        pdf(pdfFile_plot_death_ejection_fraction)
-        plot_death_ejection_fraction <- cdplot(factor(patients_data[, targetName], labels=c("survived", "dead")) ~ ejection_fraction, data=patients_data, ylab = NA, xlab="ejection fraction")
-        
-        #plot(plot_death_ejection_fraction)
-        dev.off()
-
-        # pdfFile_plot_death_age <- paste("../results/plot_death_VS_age_", exe_num, ".pdf", sep="")
-        # pdf(pdfFile_plot_death_age)
-        # plot_death_age <- cdplot(factor(targetName, labels=c("survived", "dead")) ~ age,, data=patients_data, ylab = NA)
-        # dev.off()
+if (TWO_FEATURES_PLOT == TRUE) {
 
         num_of_patients <- dim(patients_data)[1]
         num_of_features <- dim(patients_data)[2] - 1
-
-        #
-        # Pearson correlation coefficient
-        #
-
-        i <- 1
-        for (i in 1:num_of_features) {
-
-            thisPCC <- cor(patients_data[, targetName], patients_data[,i], method = c("pearson"))
-
-            cat("pearson(targetName, ", colnames(patients_data)[i],")  = ", dec_two(thisPCC), "\n", sep="")
-        }
-
-        # 
-        # Kendall
-        # 
-        i <- 1
-        for (i in 1:num_of_features) {
-
-            thisKendall <- cor(patients_data[, targetName], patients_data[,i], method = c("kendall"))
-
-            cat("kendall(targetName, ", colnames(patients_data)[i],")  = ", dec_two(thisKendall), "\n", sep="")
-        }
-
-
-        # Pearson correlation coefficients
-        # 0.37
-        # -0.26
-        # 0.24
-        # 0.03
-        # -0.20
-        # -0.00
-        # -0.04
-        # -0.01
-        # 0.08
-        # -0.00
-        # 0.07
-
 
         # Print the model tree
         # reprtree:::plot.getTree(rf_new)
