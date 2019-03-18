@@ -172,25 +172,12 @@ if (FEATURE_RANKING_PLOT_DEPICTION == TRUE) {
         mkdirResultsCommand <- "mkdir -p ../results"
         system(mkdirResultsCommand)
         cat("applied command: ", mkdirResultsCommand, "\n", sep="")
-
-
-        pdfFileNameMSE <-  paste("../results/MSE_features_", exe_num, ".pdf", sep="")
-        pdf(pdfFileNameMSE)
-        p <- ggplot(data=aggregateRankings, aes(x=reorder(features, -firstColPos), y=MeanDecreaseAccuracy)) +  geom_bar(stat="identity", fill="steelblue")  + labs(title = "Feature importance on accuracy reduction", y = "accuracy reduction", x = "features")
-        p <- p + coord_flip()
-        plot(p)
-        cat("saved plot in file ", pdfFileNameMSE, "\n", sep="")
-        dev.off()
+        x_upper_lim <- -1
+          
+         barPlotOfRanking(aggregateRankings, aggregateRankings$MeanDecreaseAccuracy, aggregateRankings$features, aggregateRankings$firstColPos, exe_num, "features", "MeanDecreaseAccuracy", x_upper_lim)
+         
+         barPlotOfRanking(aggregateRankings, aggregateRankings$MeanDecreaseGini, aggregateRankings$features, aggregateRankings$secondColPos, exe_num, "features", "MeanDecreaseGini", x_upper_lim)
             
-        # print(colnames(dd_sorted_IncNodePurity_only))
-
-        pdfFileNameGini <-  paste("../results/Gini_features_", exe_num, ".pdf", sep="")
-        pdf(pdfFileNameGini)
-        p <- ggplot(data=aggregateRankings, aes(x=reorder(features, -secondColPos), y=MeanDecreaseGini)) +  geom_bar(stat="identity", fill="steelblue")  + labs(title = "Feature importance on Gini impurity", y = "Gini impurity", x = "features")
-        p <- p + coord_flip()
-        plot(p)
-        cat("saved plot in file ", pdfFileNameGini, "\n", sep="")
-        dev.off()
 }
         
 if (TWO_FEATURES_PLOT == TRUE) {

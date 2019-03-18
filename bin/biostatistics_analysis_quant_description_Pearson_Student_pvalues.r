@@ -24,6 +24,10 @@ MEAN_INDEX <- 4
 #   targetName <- args[2]
 # }
 
+num_to_return <- 1
+upper_num_limit <- 10000000
+exe_num <- sample(1:upper_num_limit, num_to_return)
+
 LATEX_MODE <- FALSE
 
 LATEX_SEP <- "&"
@@ -229,13 +233,35 @@ if (ALL_PATIENTS_CORRELATION == TRUE) {
     }
     
     rownames(allTestsDataframe) <- allTestsDataframe$"feature"
-    allTestsDataframe$"feature" <- NULL
+    # allTestsDataframe$"feature" <- NULL
     
-    print(allTestsDataframe[order(-allTestsDataframe$abs_PCC), c("abs_PCC"), drop=FALSE])
-    print(allTestsDataframe[order(-allTestsDataframe$p), c("p"), drop=FALSE])
-    print(allTestsDataframe[order(allTestsDataframe$abs_t), c("abs_t"), drop=FALSE])
+    # let's eliminate the target index from the rank
+     targetRow <-  which(allTestsDataframe==targetName)
+    allTestsDataframe <- allTestsDataframe[-c(                                                  which(allTestsDataframe==targetName)), ]    
+    
+    
+    absPCCresultDataframe <- (allTestsDataframe[order(-allTestsDataframe$abs_PCC), c("abs_PCC"), drop=FALSE])
+    absPCCresultDataframe$pos <- c(1:dim(absPCCresultDataframe)[1])
+    absPCCresultDataframe$feature <- rownames(absPCCresultDataframe)
+        
+    p_values_resultDataframe <- (allTestsDataframe[order(allTestsDataframe$p), c("p"), drop=FALSE])
+    p_values_resultDataframe$pos <- c(1:dim(p_values_resultDataframe)[1])
+    p_values_resultDataframe$feature <- rownames(p_values_resultDataframe)
+    
+    abs_t_Dataframe <- (allTestsDataframe[order(-allTestsDataframe$abs_t), c("abs_t"), drop=FALSE])
+    abs_t_Dataframe$pos <- c(1:dim(abs_t_Dataframe)[1])
+    abs_t_Dataframe$feature <- rownames(abs_t_Dataframe)
 
 }
+
+x_upper_lim <- 1
+barPlotOfRanking(absPCCresultDataframe, absPCCresultDataframe$abs_PCC, absPCCresultDataframe$feature, absPCCresultDataframe$pos, exe_num, "feature", "abs_PCC", x_upper_lim)
+
+x_upper_lim <- 300
+barPlotOfRanking(p_values_resultDataframe, abs(log(p_values_resultDataframe$p)), p_values_resultDataframe$feature, (p_values_resultDataframe$pos), exe_num, "feature", "p", x_upper_lim)
+
+x_upper_lim <- 100
+barPlotOfRanking(abs_t_Dataframe, abs_t_Dataframe$abs_t, abs_t_Dataframe$feature, (abs_t_Dataframe$pos), exe_num, "feature", "abs_t", x_upper_lim)
 
 
 # (t(summary(patients_data)))[,c(1,3,4,6)]
