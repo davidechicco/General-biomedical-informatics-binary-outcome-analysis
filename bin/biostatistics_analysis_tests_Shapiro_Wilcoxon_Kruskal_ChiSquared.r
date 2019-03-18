@@ -3,63 +3,66 @@ setwd(".")
 # Software originally developed by Giuseppe Jurman <jurman@fbk.eu> on 1st March 2019
 # Edited by Davide Chicco <davide.chicco@gmail.com> on 4th March 2019
 
-# /usr/bin/Rscript biostatistics_analysis_tests_Shapiro_Wilcoxon_Kruskal_ChiSquared.r "../data/dataset_edited_without_time.csv" "death_event"
+# /usr/bin/Rscript biostatistics_analysis_tests_Shapiro_Wilcoxon_Kruskal_ChiSquared.r "../data/patients_dataset.csv" "death_event"
+
+filename <-  "/home/davide/projects/breast_cancer_Coimbra/data/dataR2_EDITED.csv"
+TARGET_LABEL <- "DIAGNOSIS"
 
 # Data load
 
-list.of.packages <- c("readr", "easypackages")
-new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
-if(length(new.packages)) install.packages(new.packages)
-library("easypackages")
-libraries(list.of.packages)
-
-EXP_ARG_NUM <- 2
-
-LATEX_MODE <- FALSE
-
-args = commandArgs(trailingOnly=TRUE)
-if (length(args)<EXP_ARG_NUM) {
-  stop("At least two argument must be supplied (input files)", call.=FALSE)
-} else {
-  # default output file
-  filename <- args[1]
-  TARGET_LABEL <- args[2]
-}
+# list.of.packages <- c("readr", "easypackages")
+# new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+# if(length(new.packages)) install.packages(new.packages)
+# library("easypackages")
+# libraries(list.of.packages)
+# 
+# EXP_ARG_NUM <- 2
+# 
+# LATEX_MODE <- FALSE
+# 
+# args = commandArgs(trailingOnly=TRUE)
+# if (length(args)<EXP_ARG_NUM) {
+#   stop("At least two argument must be supplied (input files)", call.=FALSE)
+# } else {
+#   # default output file
+#   filename <- args[1]
+#   TARGET_LABEL <- args[2]
+# }
 
 cat("filename: ", filename, "\n", sep="")
 cat("TARGET_LABEL: ", TARGET_LABEL, "\n", sep="")
 
-#filename <- "../data/dataset_edited_without_time.csv"
+#filename <- "../data/patients_dataset.csv"
 #TARGET_LABEL <- "death_event"
 
 
-dataset_edited_without_time <- as.data.frame(read_csv(filename))
-# print(head(dataset_edited_without_time))
+patients_dataset <- as.data.frame(read.csv(filename))
+# print(head(patients_dataset))
 
 
 ROUND_NUM <- 6
 
-dataset_edited_without_time$death_event <-
-as.factor(dataset_edited_without_time$death_event)
+patients_dataset[[TARGET_LABEL]] <-
+as.factor(patients_dataset[[TARGET_LABEL]])
 
 DEATH_LABEL <- 1
 SURVIVAL_LABEL <- 0
-dead_patients_data <-  dataset_edited_without_time[dataset_edited_without_time$death_event==DEATH_LABEL, ]
-survived_patients_data <-  dataset_edited_without_time[dataset_edited_without_time$death_event==SURVIVAL_LABEL, ]
+dead_patients_data <-  patients_dataset[patients_dataset[[TARGET_LABEL]]==DEATH_LABEL, ]
+survived_patients_data <-  patients_dataset[patients_dataset[[TARGET_LABEL]]==SURVIVAL_LABEL, ]
 
 # All the outputs of the tests are stored on the alltests lists, that we print at the end of the discussion.
 
-mycols <- names(dataset_edited_without_time)
+mycols <- names(patients_dataset)
 mycols <- mycols[mycols!=TARGET_LABEL]
 alltests <- list()
 alltests[["Wilcoxon_rank"]] <- alltests[["Kruskal"]] <- alltests[["Chi"]] <- alltests[["Shapiro"]] <- list()
 for(thecol in mycols){
-    alltests[["Wilcoxon_rank"]][[thecol]] <-     wilcox.test(as.formula(paste(thecol,TARGET_LABEL,sep="~")),     data=dataset_edited_without_time)
-    alltests[["Kruskal"]][[thecol]] <-     kruskal.test(as.formula(paste(thecol,TARGET_LABEL,sep="~")),     data=dataset_edited_without_time)
-    alltests[["Chi"]][[thecol]] <-     chisq.test(x=as.factor(dataset_edited_without_time[,thecol]),     y=dataset_edited_without_time$death_event,    simulate.p.value = TRUE)   
-    alltests[["Shapiro"]][[thecol]] <-     shapiro.test(dataset_edited_without_time[,thecol])
+    alltests[["Wilcoxon_rank"]][[thecol]] <-     wilcox.test(as.formula(paste(thecol,TARGET_LABEL,sep="~")),     data=patients_dataset)
+    alltests[["Kruskal"]][[thecol]] <-     kruskal.test(as.formula(paste(thecol,TARGET_LABEL,sep="~")),     data=patients_dataset)
+    alltests[["Chi"]][[thecol]] <-     chisq.test(x=as.factor(patients_dataset[,thecol]),     y=patients_dataset[[TARGET_LABEL]],    simulate.p.value = TRUE)   
+    alltests[["Shapiro"]][[thecol]] <-     shapiro.test(patients_dataset[,thecol])
 }
-alltests[["Shapiro"]][[TARGET_LABEL]]<- shapiro.test(as.numeric(dataset_edited_without_time$death_event))
+alltests[["Shapiro"]][[TARGET_LABEL]]<- shapiro.test(as.numeric(patients_dataset[[TARGET_LABEL]]))
 
 # As a rule of thumb, the validity of the tests is assessed by looking at the resulting p-values.
 # We start with the Shapiro test of normality,
@@ -105,6 +108,8 @@ sortedVectorWilcoxon <- sort(vectorWilcoxon)
 sortedVectorKruskal <- sort(vectorKruskal)
 sortedVectorChi <- sort(vectorChi)
 
+LATEX_MODE <- FALSE
+
 LATEX_SEP <- "&"
 LATEX_END_OF_ROW <- "\\\\"
 
@@ -120,7 +125,7 @@ if (LATEX_MODE == TRUE ) {
 }
 
 index <- 1
-cat("\n\t\t == Shapiro ==\n")
+cat("\n\t\t == Shapiro-Wilk test ==\n")
 for(thecol in names(sortedVectorShapiro)) {    
     
     cat(index, " ", SEP," \t",  names((sortedVectorShapiro)[thecol]), " ", SEP," \t ", ((sortedVectorShapiro)[[thecol]]), " ", END_OF_ROW," \n", sep="")
@@ -128,7 +133,7 @@ for(thecol in names(sortedVectorShapiro)) {
 }
 
 index <- 1
-cat("\n\t\t == Wilcoxon_rank ==\n")
+cat("\n\t\t == Wilcoxon signed-rank test ==\n")
 for(thecol in names(sortedVectorWilcoxon)) { 
     
     cat(index, " ", SEP," \t",  names((sortedVectorWilcoxon)[thecol]), " ", SEP," \t ", ((sortedVectorWilcoxon)[[thecol]]), " ", END_OF_ROW," \n", sep="")
@@ -136,7 +141,7 @@ for(thecol in names(sortedVectorWilcoxon)) {
 }
 
 index <- 1
-cat("\n\t\t == Kruskal ==\n")
+cat("\n\t\t == Kruskal-Wallis test ==\n")
 for(thecol in names(sortedVectorKruskal)) { 
     
     cat(index, " ", SEP," \t",  names((sortedVectorKruskal)[thecol]), " ", SEP," \t ", ((sortedVectorKruskal)[[thecol]]), " ", END_OF_ROW," \n", sep="")
@@ -144,7 +149,7 @@ for(thecol in names(sortedVectorKruskal)) {
 }
 
 index <- 1
-cat("\n\t\t == Chi Squared ==\n")
+cat("\n\t\t == chi squared test ==\n")
 for(thecol in names(sortedVectorChi)) { 
     
      cat(index, " ", SEP," \t",  names((sortedVectorChi)[thecol]), " ", SEP," \t ", ((sortedVectorChi)[[thecol]]), " ", END_OF_ROW," \n", sep="")

@@ -3,7 +3,7 @@ options(stringsAsFactors = FALSE)
 
 source("./utils.r")
 
-# fileName <- "../data/dataset_edited_without_time.csv"
+# fileName <- "/home/davide/projects/cardiovascular_heart_disease/data/dataset_edited_without_time.csv"
 # targetName <- "death_event"
 
 fileName <-  "/home/davide/projects/breast_cancer_Coimbra/data/dataR2_EDITED.csv"
@@ -95,7 +95,7 @@ for(i in 1:(ncol(patients_data))) {
         thisMedian <- summary(patients_data[,i])[[MEDIAN_INDEX]]
         thisMean <- summary(patients_data[,i])[[MEAN_INDEX]]
         cat("\tmedian \t mean\n", sep="")
-        cat(colnames(patients_data_target_no)[i], "\t", thisMedian, "\t", thisMean, "\n", sep="")
+        cat(colnames(patients_data)[i], "\t", thisMedian, "\t", thisMean, "\n", sep="")
     
     }
     
@@ -146,7 +146,7 @@ for(i in 1:(ncol(patients_data_target_yes))) {
         thisMedian <- summary(patients_data_target_yes[,i])[[MEDIAN_INDEX]]
         thisMean <- summary(patients_data_target_yes[,i])[[MEAN_INDEX]]
         cat("\tmedian \t mean\n", sep="")
-        cat(colnames(patients_data_target_no)[i], "\t", thisMedian, "\t", thisMean, "\n", sep="")
+        cat(colnames(patients_data_target_yes)[i], "\t", thisMedian, "\t", thisMean, "\n", sep="")
     
     }
     
@@ -192,10 +192,19 @@ for(i in 1:(ncol(patients_data_target_no))) {
 
 # All patients: p-value, t-value, and PCC
 
+vectorPCC <- c()
+vector_p_values <- c()
+vectorStudentT <- c()
+
+allTestsDataframe <- data.frame(Characters=character(), Doubles=double(),Doubles=double(),Doubles=double(),  stringsAsFactors=FALSE)
+colnames(allTestsDataframe) <- c("feature", "abs_PCC", "p", "abs_t")
+# rownames(allTestsDataframe) <- rownames(patients_data)
+
+
 if (ALL_PATIENTS_CORRELATION == TRUE) {
 
     cat("\n// all patients correlations //\n\n", sep="")
-    cat(targetName, " ", SEP,"\t abs(t) ", SEP,"\ \t p-value ", SEP," \t PCC ", SEP," \t conf_int ", SEP,"\n\n", sep="")
+    cat(targetName, " ", SEP,"\t abs(t) ", SEP,"\ \t p-value ", SEP," \t abs(PCC) ", SEP," \t conf_int ", SEP,"\n\n", sep="")
     for(i in 1:(ncol(patients_data))) { 
 
         # cat("\n\ncorrelation between (target) ", colnames(patients_data)[targetIndex], " and ",  colnames(patients_data)[i], ": \n", sep="") 
@@ -204,21 +213,29 @@ if (ALL_PATIENTS_CORRELATION == TRUE) {
         
         thisTtest <- t.test(patients_data[,i], patients_data[,targetIndex])
         tValue <- abs((thisTtest$statistic)[[1]])
-        pValue <- dec_two(thisTtest$p.value)
-        thisPCC <- cor(patients_data[,i], patients_data[,targetIndex], method=c("pearson"))
+        pValue <- thisTtest$p.value
+        thisAbsPCC <- abs(cor(patients_data[,i], patients_data[,targetIndex], method=c("pearson")))
         conf_int_start <- dec_two((thisTtest$conf.int)[1])
         conf_int_end <- dec_two((thisTtest$conf.int)[2])
         
         # cat(colnames(patients_data)[i], "\t\t abs(t) \t p-value \t PCC \t conf_int\n", sep="")
-        cat(colnames(patients_data)[i], " ", SEP,"\t", dec_two(tValue), " ", SEP,"\t", pValue, " ", SEP,"\t", dec_two(thisPCC), " ", SEP,"\t", conf_int_start, " ", SEP,"\t", conf_int_end, " ", SEP,"\n", sep="")
+        cat(colnames(patients_data)[i], " ", SEP,"\t", dec_two(tValue), " ", SEP,"\t", dec_two(pValue), " ", SEP,"\t", dec_two(thisAbsPCC), " ", SEP,"\t", conf_int_start, " ", SEP,"\t", conf_int_end, " ", END_OF_ROW,"\n", sep="")
         
         # cat("t = ", dec_two(tValue), "\n", sep="")
         # cat("p-value = ", dec_two(pValue), "\n", sep="")
-        # cat("PCC(", colnames(patients_data)[targetIndex], ", ", colnames(patients_data)[i], ") = ",  dec_two(thisPCC), "\n", sep="")
-
+        # cat("PCC(", colnames(patients_data)[targetIndex], ", ", colnames(patients_data)[i], ") = ",  dec_two(thisAbsPCC), "\n", sep="")
+      
+         allTestsDataframe[i,] <- data.frame(feature = colnames(patients_data)[i], abs_PCC = thisAbsPCC, p=pValue, abs_t=tValue)         
     }
+    
+    rownames(allTestsDataframe) <- allTestsDataframe$"feature"
+    allTestsDataframe$"feature" <- NULL
+    
+    print(allTestsDataframe[order(-allTestsDataframe$abs_PCC), c("abs_PCC"), drop=FALSE])
+    print(allTestsDataframe[order(-allTestsDataframe$p), c("p"), drop=FALSE])
+    print(allTestsDataframe[order(allTestsDataframe$abs_t), c("abs_t"), drop=FALSE])
 
 }
 
 
-(t(summary(patients_data)))[,c(1,3,4,6)]
+# (t(summary(patients_data)))[,c(1,3,4,6)]
