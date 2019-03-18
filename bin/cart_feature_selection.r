@@ -1,8 +1,8 @@
 setwd(".")
 options(stringsAsFactors = FALSE)
 
-fileNameData<- "../data/dataset_edited_without_time.csv"
-targetName <- "death_event"
+fileNameData <-  "../data/Mesothelioma_data_set_EDITED.csv" 
+targetName <- "class_of_diagnosis"
 
 # args = commandArgs(trailingOnly=TRUE)
 # if (length(args)<EXP_ARG_NUM) {
@@ -31,23 +31,51 @@ cat("Read data from file ", fileNameData, "\n", sep="")
 patients_data <- patients_data%>%dplyr::select(-targetName,targetName)
 
 target_index <- dim(patients_data)[2]
-original_patients_data <- patients_data
 
-# shuffle the rows
-patients_data <- original_patients_data[sample(nrow(original_patients_data)),] 
+allExecutionsFinalRanking <- data.frame(Doubles=double(),
+                 Ints=integer(),
+                 Factors=factor(),
+                 Logicals=logical(),
+                 Characters=character(),
+                 stringsAsFactors=FALSE)
 
-# select formula based on feature
-allFeaturesFormula <- as.formula(paste(colnames(patients_data)[target_index], '.', sep=' ~ ' ))
-selectedFormula <- allFeaturesFormula
+execution_number <- 20
+cat("Number of executions = ", execution_number, "\n", sep="")
+for(exe_i in 1:execution_number)
+{
 
-cart_model <- rpart(selectedFormula, method="class", data=patients_data);
-ptree <- prune(cart_model, cp=cart_model$cptable[which.min(cart_model$cptable[,"xerror"]),"CP"])
-importanceFrame <- (varImp(ptree))
-importanceFrame$feature <- rownames(importanceFrame)
-importanceFrameSorted <- importanceFrame[order(-importanceFrame$"Overall"), ]
+    cat("[Execution number ", exe_i," of the CART decision tree]\n")
 
-rownames(importanceFrameSorted) <- (removeUnderscore(rownames(importanceFrameSorted)))
-importanceFrameSorted$feature <- removeUnderscore(importanceFrameSorted$feature)
+    # shuffle the rows
+    patients_data <- patients_data[sample(nrow(patients_data)),] 
+
+    # select formula based on feature
+    allFeaturesFormula <- as.formula(paste(colnames(patients_data)[target_index], '.', sep=' ~ ' ))
+    selectedFormula <- allFeaturesFormula
+
+    cart_model <- rpart(selectedFormula, method="class", data=patients_data);
+    ptree <- prune(cart_model, cp=cart_model$cptable[which.min(cart_model$cptable[,"xerror"]),"CP"])
 
 
-print(importanceFrameSorted)
+    importanceFrame <- (varImp(ptree))
+    importanceFrame$feature <- rownames(importanceFrame)
+    importanceFrameSorted <- importanceFrame[order(-importanceFrame$"Overall"), ]
+
+    rownames(importanceFrameSorted) <- removeUnderscoreAndDot(rownames(importanceFrameSorted))
+    importanceFrameSorted$feature <- removeUnderscoreAndDot(importanceFrameSorted$feature)
+
+
+    if (exe_i == 1) {
+        allExecutionsFinalRanking <- importanceFrameSorted[c("Overall")]
+    } else {
+        allExecutionsFinalRanking$"Overall" <- allExecutionsFinalRanking$"Overall" + importanceFrameSorted$"Overall"
+    } 
+}
+
+cat("\n\n\n == final ranking after ", execution_number, " executions\n", sep="")
+
+allExecutionsFinalRanking$"finalOverall" <- allExecutionsFinalRanking$"Overall" / execution_number
+allExecutionsFinalRanking <- allExecutionsFinalRanking[order(-allExecutionsFinalRanking$"finalOverall"), ]
+allExecutionsFinalRanking$"finalPos" <- c(1:dim(allExecutionsFinalRanking)[1])
+
+print(allExecutionsFinalRanking[, c("finalOverall", "finalPos")])
