@@ -1,9 +1,54 @@
 setwd(".")
 options(stringsAsFactors = FALSE)
 
-EXP_ARG_NUM <- 2
+# agregateTwoSortedRankings
+agregateTwoSortedRankings <- function(dd, firstColumnName, secondColumnName) {
+
+    cat("\n[function agregateTwoSortedRankings()]\n")
+
+    # dd_sorted_MSE <- dd[order(-dd$firstColumnName), ]
+    dd_sorted_firstColumn <- dd[order(-dd[[firstColumnName]]), ]
+    # print(dd_sorted_firstColumn)
+    
+    dd_sorted_secondColumn <- dd[order(-dd[[secondColumnName]]), ]
+    # print(dd_sorted_IncNodePurity);
 
 
+    # varImpPlot(rf_output)
+    dd_sorted_firstColumn_only <- dd_sorted_firstColumn
+    dd_sorted_firstColumn_only[[secondColumnName]] <- NULL # we do not need the other values
+    dd_sorted_firstColumn_only$secondColPos <- c(1:dim(dd_sorted_firstColumn_only)[1])
+    
+    dd_sorted_secondColumn_only <- dd_sorted_secondColumn
+    dd_sorted_secondColumn_only[[firstColumnName]] <- NULL # we do not need the other values
+    dd_sorted_secondColumn_only$firstColPos <- c(1:dim(dd_sorted_secondColumn_only)[1])
+
+    dd_sorted_firstColumn_only$features <- rownames(dd_sorted_firstColumn_only)
+    dd_sorted_secondColumn_only$features <- rownames(dd_sorted_secondColumn_only)
+
+    # let's sort alphabetically
+    dd_sorted_firstColumn_only <- dd_sorted_firstColumn_only[order(dd_sorted_firstColumn_only$"features"), ]
+    dd_sorted_secondColumn_only <- dd_sorted_secondColumn_only[order(dd_sorted_secondColumn_only$"features"), ]
+    
+    
+    cat("\ncbind()\n")
+    mergedRanking <- cbind(dd_sorted_firstColumn_only, dd_sorted_secondColumn_only)
+
+    mergedRankingAlphaBeta <- mergedRanking[order(mergedRanking$"features"), ]
+    mergedRankingAlphaBeta$posSum <- mergedRankingAlphaBeta$firstColPos + mergedRankingAlphaBeta$secondColPos
+
+    mergedRankingGeneralRank <- mergedRankingAlphaBeta[order(mergedRankingAlphaBeta$"posSum"), ]
+    mergedRankingGeneralRank$finalPos <- c(1:dim(mergedRankingGeneralRank)[1])
+
+    # print(mergedRankingGeneralRank)
+    
+    return (mergedRankingGeneralRank)
+
+}
+
+
+# EXP_ARG_NUM <- 2
+# 
 # args = commandArgs(trailingOnly=TRUE)
 # if (length(args)<EXP_ARG_NUM) {
 #   stop("At least two argument must be supplied (input files)", call.=FALSE)
@@ -16,8 +61,8 @@ EXP_ARG_NUM <- 2
 # fileNameData <-  "/home/davide/projects/breast_cancer_Coimbra/data/dataR2_EDITED.csv"
 # targetName <- "DIAGNOSIS"
 
-fileNameData <- "/home/davide/projects/mesothelioma_project/mesothelioma-diagnosis-predictions/Mesothelioma_data_set_33features.csv"
-targetName <- "class.of.diagnosis"
+fileNameData <-  "/home/dave/cervical_cancer/cervical_arranged_NORM_ONLY_BIOPSY_TARGET.csv" 
+targetName <- "Biopsy"
 
 # fileNameData<- "../data/dataset_edited_without_time.csv"
 # targetName <- "death_event"
@@ -33,82 +78,79 @@ source("./utils.r")
 
 PLOT_DEPICTION <- FALSE
 
-
-
 patients_data <- read.csv(fileNameData, header = TRUE, sep =",");
 cat("Read data from file ", fileNameData, "\n", sep="")
 
+cat("application of dplyr::select()\n")
 patients_data <- patients_data%>%dplyr::select(-targetName,targetName)
 target_index <- dim(patients_data)[2]    
 
 num_to_return <- 1
-exe_num <- sample(1:as.numeric(Sys.time()), num_to_return)
+upper_num_limit <- 10000000
+exe_num <- sample(1:upper_num_limit, num_to_return)
 
 # allFeaturesFormula <- as.formula(paste(as.factor(colnames(patients_data)[target_index]), '.', sep=' ~ ' ))
 # rf_output <- randomForest(allFeaturesFormula, data=patients_data, importance=TRUE, proximity=TRUE)
 
-rf_output <- randomForest(as.factor(patients_data[, targetName]) ~ ., data=patients_data, importance=TRUE, proximity=TRUE)
+allExecutionsFinalRanking <- data.frame(Doubles=double(),
+                 Ints=integer(),
+                 Factors=factor(),
+                 Logicals=logical(),
+                 Characters=character(),
+                 stringsAsFactors=FALSE)
+
+execution_number <- 10 
+cat("Number of executions = ", execution_number, "\n", sep="")
+for(exe_i in 1:execution_number)
+{
+
+    cat("\n\n\n Execution number ", exe_i,"\n", sep="")
+    cat("[Randomizing the rows]\n")
+    patients_data <- patients_data[sample(nrow(patients_data)),] # shuffle the rows
 
 
-dd <- as.data.frame(rf_output$importance);
-
-dd_sorted_MSE <- dd[order(-dd$"MeanDecreaseAccuracy"), ]
-# print(dd_sorted_MSE);
-
-dd_sorted_IncNodePurity <- dd[order(-dd$"MeanDecreaseGini"), ]
-# print(dd_sorted_IncNodePurity);
-
-# feature sum_of_positions
-# 
-# serum_creatinine         2
-# ejection_fraction	     4
-# age	                                 6
-# creatinine_phosphokinase	10
-# serum_sodium	        10
-# gender	                        13
-# platelets	                    13
-# smoking	                    16
-# blood_pressure	        17
-# diabetes	                    20
-# anaemia	                    21
+    cat("application of randomForest()\n")
+    rf_output <- randomForest(as.factor(patients_data[, targetName]) ~ ., data=patients_data, importance=TRUE, proximity=TRUE)
 
 
-varImpPlot(rf_output)
+    dd <- as.data.frame(rf_output$importance);
+    
+    mergedRankingGeneralRank <- agregateTwoSortedRankings(dd, "MeanDecreaseAccuracy", "MeanDecreaseGini")
+    
+    lastCol <- dim(mergedRankingGeneralRank)[2]
 
-dd_sorted_IncNodePurity_only <- dd_sorted_IncNodePurity
-dd_sorted_IncNodePurity_only$"MeanDecreaseAccuracy" <- NULL
-dd_sorted_IncNodePurity_only$purityPos <- c(1:dim(dd_sorted_IncNodePurity_only)[1])
-dd_sorted_MSE_only <- dd_sorted_MSE
-# colnames(dd_sorted_MSE_only)[1] <- c("MeanDecreaseAccuracy")
+    featuresCol <- 6
 
+    rownames(mergedRankingGeneralRank) <- (removeDot(removeUnderscore(rownames(mergedRankingGeneralRank))))
+    mergedRankingGeneralRank$features <- removeDot(removeUnderscore(mergedRankingGeneralRank$features))
 
-dd_sorted_MSE_only$IncNodePurity <- NULL
-dd_sorted_MSE_only$msePos <- c(1:dim(dd_sorted_IncNodePurity_only)[1])
+    print(mergedRankingGeneralRank[, c("finalPos", "MeanDecreaseAccuracy", "MeanDecreaseGini"), drop=FALSE])
 
-dd_sorted_MSE_only$features <- rownames(dd_sorted_MSE_only)
-dd_sorted_IncNodePurity_only$features <- rownames(dd_sorted_IncNodePurity_only)
+    finalRankingOneExecution <- mergedRankingGeneralRank[, c("features", "finalPos", "MeanDecreaseAccuracy", "MeanDecreaseGini"), drop=FALSE]
+    finalRankingOneExecutionAlphaBeta <- finalRankingOneExecution[order(finalRankingOneExecution$"features"), , drop=FALSE]
 
-#print(dd_sorted_MSE_only)
-#print(dd_sorted_IncNodePurity_only)
+    if (exe_i == 1) {
+        allExecutionsFinalRanking <- finalRankingOneExecutionAlphaBeta
+    } else {
+        
+        allExecutionsFinalRanking$MeanDecreaseAccuracy <- allExecutionsFinalRanking$MeanDecreaseAccuracy + finalRankingOneExecutionAlphaBeta$MeanDecreaseAccuracy
+        allExecutionsFinalRanking$MeanDecreaseGini <- allExecutionsFinalRanking$MeanDecreaseGini + finalRankingOneExecutionAlphaBeta$MeanDecreaseGini
+        allExecutionsFinalRanking$finalPos <- allExecutionsFinalRanking$finalPos + finalRankingOneExecutionAlphaBeta$finalPos
+    }
+}
 
-mergedRanking <- cbind(dd_sorted_MSE_only, dd_sorted_IncNodePurity_only)
+allExecutionsFinalRanking$MeanDecreaseAccuracy <- allExecutionsFinalRanking$MeanDecreaseAccuracy / execution_number
+allExecutionsFinalRanking$MeanDecreaseGini <- allExecutionsFinalRanking$MeanDecreaseGini / execution_number
+allExecutionsFinalRanking$finalPos <- allExecutionsFinalRanking$finalPos / execution_number
 
-mergedRankingAlphaBeta <- mergedRanking[order(mergedRanking$"features"), ]
-mergedRankingAlphaBeta$posSum <- mergedRankingAlphaBeta$purityPos + mergedRankingAlphaBeta$msePos
+cat("\n\n\n\n== final ranking after ", execution_number, " executions == \n", sep="")
 
-mergedRankingGeneralRank <- mergedRankingAlphaBeta[order(mergedRankingAlphaBeta$"posSum"), ]
-mergedRankingGeneralRank$finalPos <- c(1:dim(mergedRankingGeneralRank)[1])
-lastCol <- dim(mergedRankingGeneralRank)[2]
+allExecutionsFinalRanking_mse_Gini <-  allExecutionsFinalRanking[, c("MeanDecreaseAccuracy", "MeanDecreaseGini")]
+aggregateRankings <- agregateTwoSortedRankings(allExecutionsFinalRanking_mse_Gini, "MeanDecreaseAccuracy", "MeanDecreaseGini")
 
-featuresCol <- 6
+print(aggregateRankings[, c("finalPos", "MeanDecreaseAccuracy", "MeanDecreaseGini")])
 
-rownames(mergedRankingGeneralRank) <- (removeDot(removeUnderscore(rownames(mergedRankingGeneralRank))))
-mergedRankingGeneralRank$features <- removeDot(removeUnderscore(mergedRankingGeneralRank$features))
-
-print(mergedRankingGeneralRank[, c("finalPos", "MeanDecreaseAccuracy", "MeanDecreaseGini"), drop=FALSE])
-
-# alphabetical order
-# importanceFrameSorted[order(importanceFrameSorted$feature), ]
+# aggregateRankings[c("features",  )
 
 
 if (PLOT_DEPICTION == TRUE) {
