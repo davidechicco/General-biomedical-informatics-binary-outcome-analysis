@@ -1,8 +1,8 @@
 setwd(".")
 options(stringsAsFactors = FALSE)
 
-fileName <- "../data/dataset_edited_without_time.csv"
-targetName <- "death_event"
+fileNameData <-  "../data/Mesothelioma_data_set_EDITED.csv" 
+targetName <- "class_of_diagnosis"
 
 # args = commandArgs(trailingOnly=TRUE)
 # if (length(args)<EXP_ARG_NUM) {
@@ -13,7 +13,7 @@ targetName <- "death_event"
 #   targetName <- args[2]
 # }
 
-list.of.packages <- c("easypackages", "e1071","PRROC", "caret", "fastAdaboost", "dplyr", "pastecs")
+list.of.packages <- c("easypackages", "e1071","PRROC", "caret", "fastAdaboost", "dplyr", "pastecs", "kernlab")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 
@@ -22,9 +22,10 @@ libraries(list.of.packages)
 
 source("./confusion_matrix_rates.r")
 source("./utils.r")
+thisMethod <- "svmLinear"
 
-patients_data <- read.csv(file=fileName,head=TRUE,sep=",",stringsAsFactors=FALSE)
-cat("fileName = ", fileName, "\n", sep="")
+patients_data <- read.csv(file=fileNameData,head=TRUE,sep=",",stringsAsFactors=FALSE)
+cat("fileNameData = ", fileNameData, "\n", sep="")
 
 # put the target on the last right position
 patients_data <- patients_data%>%select(-targetName,targetName)
@@ -46,26 +47,57 @@ dataset_dim_retriever(patients_data)
 target_index <- dim(patients_data)[2]
 # imbalance_retriever(patients_data[,target_index])
 
-patients_data_labels <- (patients_data[, target_index])
+allExecutionsFinalRanking <- data.frame(Doubles=double(),
+                 Ints=integer(),
+                 Factors=factor(),
+                 Logicals=logical(),
+                 Characters=character(),
+                 stringsAsFactors=FALSE)
+                 
+execution_number <- 100
+cat("Number of executions = ", execution_number, "\n", sep="")
+for(exe_i in 1:execution_number)
+{
 
+    cat("\n\n[Execution number ", exe_i," of the ", thisMethod, "]\n")
 
-num_folds <- 200
-num_feature <- c(ncol(patients_data))
+    patients_data <- patients_data[sample(nrow(patients_data)),] # shuffle the rows again
+    patients_data_labels <- (patients_data[, target_index])
 
-cat("SVM linear\n")
+    num_folds <- 200
+    num_feature <- c(ncol(patients_data))
 
-# svm for feature selection
-svmProfile <- rfe(patients_data, patients_data_labels,
-                  sizes = num_feature,
-                  rfeControl = rfeControl(functions = caretFuncs, number = num_folds),
-                  method = "svmRadial")
-                  
-                  
-featureImportance <- varImp(svmProfile, scale=FALSE)
-featureImportance$feature <- rownames(featureImportance)
+    cat("kernel: ", thisMethod,"\n")
+    
 
-rownames(featureImportance) <- (removeUnderscore(rownames(featureImportance)))
-featureImportance$feature <- removeUnderscore(featureImportance$feature)
+    # svm for feature selection
+    svmProfile <- rfe(patients_data, patients_data_labels,
+                    sizes = num_feature,
+                    rfeControl = rfeControl(functions = caretFuncs, number = num_folds),
+                    method = thisMethod)
+                    
+                    
+    featureImportance <- varImp(svmProfile, scale=FALSE)
+    featureImportance$feature <- rownames(featureImportance)
 
-print(featureImportance)
+    rownames(featureImportance) <- removeUnderscoreAndDot(rownames(featureImportance))
+    featureImportance$feature <- removeUnderscoreAndDot(featureImportance$feature)
 
+    cat("== temporary ranking == \n")
+    print(head(featureImportance[c("Overall")]))
+    
+    
+    if (exe_i == 1) {
+        allExecutionsFinalRanking <- featureImportance[c("Overall")]
+    } else {
+        allExecutionsFinalRanking$"Overall" <- allExecutionsFinalRanking$"Overall" + featureImportance$"Overall"
+    } 
+}
+
+cat("\n\n\n == final ranking after ", execution_number, " executions\n", sep="")
+
+allExecutionsFinalRanking$"finalOverall" <- allExecutionsFinalRanking$"Overall" / execution_number
+allExecutionsFinalRanking <- allExecutionsFinalRanking[order(-allExecutionsFinalRanking$"finalOverall"), ]
+allExecutionsFinalRanking$"finalPos" <- c(1:dim(allExecutionsFinalRanking)[1])
+
+print(allExecutionsFinalRanking[, c("finalOverall", "finalPos")])
