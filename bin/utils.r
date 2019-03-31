@@ -10,6 +10,10 @@ barPlotOfRanking <- function(rankingDataFrame, valuesToRank, featuresCol, positi
         pdfWidth <- 20 # inches
         textSize <- 30
         
+        mkDirResultsCommand <- "mkdir -p ../results/"
+        system(mkDirResultsCommand)
+        cat("just run the command: ", mkDirResultsCommand, "\n", sep="")
+        
         thisPdfFile <-  paste("../results/", y_label, "_features_", exe_num, ".pdf", sep="")
         pdf(thisPdfFile)
         p <- ggplot(data=rankingDataFrame, aes(x=reorder(featuresCol, -positionCol), y=valuesToRank)) +  geom_bar(stat="identity", fill="steelblue")  + labs(title = paste("Feature ranking on ", y_label, sep=""), y = y_label, x = x_label)        

@@ -54,13 +54,13 @@ tableAnalysis <- function(dataframe_patients)
 
 ## part to edit manually ##
 
-fileName <-  "/home/dave/sepsis_severity_ICU/data/sepsis_severity_dataset_edited_2019-02-11.csv"
-targetName <- "ADDED.survival"
+fileName <-   "/home/dave/Downloads/breast_cancer_Coimbra_dataR2.csv"
+targetName <- "Classification"
 ABNORMAL_TARGET_CONDITION <- 1
 NORMAL_TARGET_CONDITION <- 0
 
 CORRELATIONS_PLOTS <- FALSE
-INDEP_YES_NO_QUANT_DESCRIPTION <- TRUE
+INDEP_YES_NO_QUANT_DESCRIPTION <- FALSE
 
 ## ## ## ## ## ## ## ## ##
 

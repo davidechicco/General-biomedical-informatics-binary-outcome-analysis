@@ -5,8 +5,8 @@ setwd(".")
 
 # /usr/bin/Rscript biostatistics_analysis_tests_Shapiro_Wilcoxon_Kruskal_ChiSquared.r "../data/patients_dataset.csv" "death_event"
 
-filename <-  "/home/davide/projects/breast_cancer_Coimbra/data/dataR2_EDITED.csv"
-TARGET_LABEL <- "DIAGNOSIS"
+filename <-   "/home/dave/Downloads/breast_cancer_Coimbra_dataR2.csv"
+TARGET_LABEL <- "Classification"
 
 CORRELATIONS_PLOTS <- TRUE
 

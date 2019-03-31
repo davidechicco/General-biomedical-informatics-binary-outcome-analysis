@@ -6,12 +6,11 @@ source("./utils.r")
 # fileName <- "/home/davide/projects/cardiovascular_heart_disease/data/dataset_edited_without_time.csv"
 # targetName <- "death_event"
 
-fileName <-  "/home/dave/sepsis_severity_ICU/data/sepsis_severity_dataset_edited_2019-02-11.csv"
-targetName <- "ADDED.survival"
+fileName <-  "/home/dave/Downloads/breast_cancer_Coimbra_dataR2.csv"
+targetName <- "Classification"
 
 ALL_PATIENTS_CORRELATION <- TRUE
 CORRELATIONS_PLOTS <- FALSE
-INDEP_YES_NO_QUANT_DESCRIPTION <- FALSE
 
 EXP_ARG_NUM <- 2
 MEDIAN_INDEX <- 3
