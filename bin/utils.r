@@ -1,5 +1,15 @@
 options(stringsAsFactors = FALSE)
 
+list.of.packages <- c("easypackages", "ggplot2")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
+
+library("easypackages")
+libraries(list.of.packages)
+
+
+
+
 # barplot of 
 barPlotOfRanking <- function(rankingDataFrame, valuesToRank, featuresCol, positionCol, exe_num, x_label, y_label, x_upper_lim) 
 {
