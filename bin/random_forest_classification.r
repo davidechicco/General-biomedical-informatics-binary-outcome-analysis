@@ -3,8 +3,13 @@ options(stringsAsFactors = FALSE)
 
 EXP_ARG_NUM <- 2
 
-fileName <-  "/home/davide/projects/breast_cancer_Coimbra/data/dataR2_EDITED.csv" 
-targetName <- "DIAGNOSIS"
+# fileName <-  "/home/davide/projects/heart-failure-gene-expression-analysis/temp/patients_data_dataset_dim_red_svd5_file_1052379918.csv" 
+# targetName <- "diagnosis"
+
+fileName <- "/home/davide/projects/heart-failure-gene-expression-analysis/data_preprocessed/STEMI_patients_data_heart_failure_1052379918_dimRed_47621531.csv"
+targetName <- "added_diagnosis"
+
+TRAIN_SET_OVERSAMPLING_SYNTHETIC <- TRUE
 
 # args = commandArgs(trailingOnly=TRUE)
 # if (length(args)<EXP_ARG_NUM) {
@@ -38,7 +43,7 @@ source("./utils.r")
 
 NUM_METRICS <- 7
 confMatDataFrame <- matrix(ncol=NUM_METRICS, nrow=1)
-colnames(confMatDataFrame) <- c("MCC", "F1 score", "accuracy", "TP rate", "TN rate", "PR AUC", "ROC AUC")
+colnames(confMatDataFrame) <- c("MCC", "F1 score", "accuracy", "TP_rate", "TN_rate", "PR_AUC", "ROC_AUC")
 
 threshold <- 0.5
 
@@ -47,7 +52,11 @@ cat("fileName = ", fileName, "\n", sep="")
 
 # let's put the target label last on the right 
 patients_data <- patients_data%>%select(-targetName,targetName)
+target_index <- dim(patients_data)[2]    
 patients_data_original <- patients_data
+
+# formula
+allFeaturesFormula <- as.formula(paste(as.factor(colnames(patients_data)[target_index]), '.', sep=' ~ ' ))
 
 # cycle of executions
 
@@ -62,8 +71,6 @@ for(exe_i in 1:execution_number)
     totalElements <- dim(patients_data)[1]
 
     subsets_size <- totalElements
-
-    target_index <- dim(patients_data)[2]    
 
     target_label <- colnames(patients_data[target_index])
     cat("target_label = ", target_label, "\n", sep="")
@@ -102,7 +109,7 @@ for(exe_i in 1:execution_number)
     } else {
 
 
-    # the training set is the first 60% of the whole dataset
+        # the training set is the first 60% of the whole dataset
         training_set_first_index <- 1 # NEW
         training_set_last_index <- round(dim(patients_data)[1]*training_set_perc/100) # NEW
 
@@ -114,22 +121,33 @@ for(exe_i in 1:execution_number)
         patients_data_train <- patients_data[training_set_first_index:training_set_last_index, 1:(target_index)] # NEW
         patients_data_test <- patients_data[test_set_first_index:test_set_last_index, 1:(target_index)] # NEW
         
+        # train_balanced_over <- ovun.sample(allFeaturesFormula, data = patients_data_train, method = "both",  p=0.5, N = (nrow(patients_data_train)*2))$data
+        # patients_data_train <- train_balanced_over
+         
+         # https://www.analyticsvidhya.com/blog/2016/03/practical-guide-deal-imbalanced-classification-problems/
+         
+         if(TRAIN_SET_OVERSAMPLING_SYNTHETIC == TRUE)
+         {
+            thisP <- 0.5
+         
+            data.rose <- ROSE(allFeaturesFormula, data = patients_data_train, p=thisP, seed = 1)$data
+            patients_data_train <- data.rose
+         }
+        
         cat("[training set dimensions: ", dim(patients_data_train)[1], " patients]\n")
 
         cat("[test set dimensions: ", dim(patients_data_test)[1], " patients]\n")
 
         cat("[Creating the training set and test set for the labels \"1\"-\"0\"]\n")
-        patients_data_train_labels <- patients_data[training_set_first_index:training_set_last_index, target_index] # NEW
+        patients_data_train_labels <- patients_data_train[, target_index] # NEW
         patients_data_test_labels <- patients_data[test_set_first_index:test_set_last_index, target_index]   # NEW
 
     }
 
 
     dataset_dim_retriever(patients_data_train)
-    imbalance_retriever(patients_data_train[, targetName])
+    imbalance_retriever(patients_data_train[, targetName])    
 
-    allFeaturesFormula <- as.formula(paste(as.factor(colnames(patients_data)[target_index]), '.', sep=' ~ ' ))
-    # allFeaturesFormula <- patients_data_train[,targetName] ~ .
     cat("\n[Training the random forest classifier on the training set]\n")
 
     rf_new <- NULL
@@ -153,4 +171,6 @@ for(exe_i in 1:execution_number)
 medianRowResults <- (statDescConfMatr)[c("median"),]
 cat("\n\n")
 print(dec_two(medianRowResults))
+meanRowResults <- (statDescConfMatr)[c("mean"),]
+print(dec_two(meanRowResults))
 cat("\n\n=== === === ===\n")

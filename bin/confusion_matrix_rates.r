@@ -23,7 +23,7 @@ confusion_matrix_rates <- function (actual_labels, predicted_values, keyword)
     cat("\nPR AUC (integral) \t", prc_auc, "\n", sep="")    
     # cat("PRC AUC (Davis & Goadrich) ", pr_curve_test$auc.davis.goadrichl, "\n", sep="")
 
-    roc_curve_test <- roc.curve(scores.class0 = fg_test, scores.class1 = bg_test, curve = F)
+    roc_curve_test <- PRROC::roc.curve(scores.class0 = fg_test, scores.class1 = bg_test, curve = F)
     # plot(pr_curve_test)
     # print(roc_curve_test)
     roc_auc <- roc_curve_test$auc
@@ -83,7 +83,7 @@ confusion_matrix_rates <- function (actual_labels, predicted_values, keyword)
     outputDataframe[,5] <- specificity
     outputDataframe[,6] <- prc_auc
     outputDataframe[,7] <- roc_auc
-    colnames(outputDataframe) <- c("MCC", "F1 score", "accuracy", "TP rate", "TN rate", "PR AUC", "ROC AUC")
+    colnames(outputDataframe) <- c("MCC", "F1_score", "accuracy", "TP_rate", "TN_rate", "PR_AUC", "ROC_AUC")
 
     return(outputDataframe)
 }
