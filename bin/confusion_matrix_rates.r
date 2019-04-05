@@ -1,13 +1,15 @@
 options(stringsAsFactors = FALSE)
 # library("clusterSim")
 
-list.of.packages <- c("PRROC", "e1071")
+list.of.packages <- c("easypackages", "PRROC", "e1071")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 
-library("e1071")
-library("PRROC")
-source("./utils.r")
+library("easypackages")
+libraries(new.packages)
+script_dir <- dirname(sys.frame(1)$ofile)
+#cat("script_dir: ", script.dir, "\n", sep="")
+source(paste0(script_dir,"/utils.r"))
 
 # Confusion matrix rates
 confusion_matrix_rates <- function (actual_labels, predicted_values, keyword)

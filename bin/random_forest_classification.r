@@ -6,10 +6,10 @@ EXP_ARG_NUM <- 2
 # fileName <-  "/home/davide/projects/heart-failure-gene-expression-analysis/temp/patients_data_dataset_dim_red_svd5_file_1052379918.csv" 
 # targetName <- "diagnosis"
 
-fileName <- "/home/davide/projects/heart-failure-gene-expression-analysis/data_preprocessed/STEMI_patients_data_heart_failure_1052379918_dimRed_47621531.csv"
-targetName <- "added_diagnosis"
+# fileName <- "/home/davide/projects/heart-failure-gene-expression-analysis/data_preprocessed/STEMI_patients_data_heart_failure_1052379918_dimRed_47621531.csv"
+# targetName <- "added_diagnosis"
 
-TRAIN_SET_OVERSAMPLING_SYNTHETIC <- TRUE
+TRAIN_SET_OVERSAMPLING_SYNTHETIC <- FALSE
 
 # args = commandArgs(trailingOnly=TRUE)
 # if (length(args)<EXP_ARG_NUM) {
@@ -24,13 +24,13 @@ TRAIN_SET_OVERSAMPLING_SYNTHETIC <- TRUE
 # fileName <- "../data/dataset_edited_without_time.csv"
 # targetName <- "death_event"
 
-# fileName <- "../../../projects/sepsis_severity_ICU/data/sepsis_severity_dataset_edited_2019-02-11.csv"
-# targetName <- "ADDED.survival"
+fileName <- "../../../projects/sepsis_severity_ICU/data/sepsis_severity_dataset_edited_2019-02-11.csv"
+targetName <- "ADDED.survival"
 
 cat("fileName: ", fileName, "\n", sep="")
 cat("targetName: ", targetName, "\n", sep="")
 
-list.of.packages <- c("easypackages", "PRROC", "e1071", "randomForest","class", "gmodels", "formula.tools", "dplyr", "pastecs")
+list.of.packages <- c("easypackages", "PRROC", "e1071", "randomForest","class", "gmodels", "formula.tools", "dplyr", "pastecs", "ROSE")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 
