@@ -19,8 +19,8 @@ source("./utils.r")
 num_to_return <- 1
 exe_num <- sample(1:as.numeric(Sys.time()), num_to_return)
 
-datasetFileName <- "/home/davide/projects/heart-failure-gene-expression-analysis/temp/patients_data_dataset_dim_red_svd5_file_1052379918.csv"
-targetName <- "diagnosis"
+datasetFileName <- "/home/davide/projects/heart-failure-gene-expression-analysis/temp/STEMI_patients_data_heart_failure_1052379918.csv"
+targetName <- "added_diagnosis"
 patients_dataset <- read.csv(file=datasetFileName,head=TRUE,sep=",",stringsAsFactors=FALSE)
 cat("datasetFileName = ", datasetFileName, "\n", sep="")
 

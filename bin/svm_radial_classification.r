@@ -3,8 +3,8 @@ options(stringsAsFactors = FALSE)
 
 EXP_ARG_NUM <- 2
 
-fileName <-  "/home/davide/projects/breast_cancer_Coimbra/data/dataR2_EDITED.csv" 
-targetName <- "DIAGNOSIS"
+fileName <-  "/home/davide/projects/heart-failure-gene-expression-analysis/temp/patients_data_dataset_dim_red_svd5_file_1052379918.csv" 
+targetName <- "diagnosis"
 
 # args = commandArgs(trailingOnly=TRUE)
 # if (length(args)<EXP_ARG_NUM) {

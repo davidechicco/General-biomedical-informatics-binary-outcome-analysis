@@ -6,7 +6,7 @@ source("./utils.r")
 # fileName <- "/home/davide/projects/cardiovascular_heart_disease/data/dataset_edited_without_time.csv"
 # targetName <- "death_event"
 
-fileName <-  "/home/dave/Downloads/breast_cancer_Coimbra_dataR2.csv"
+fileName <-  "/home/davide/projects/breast_cancer_Coimbra/data/dataR2.csv"
 targetName <- "Classification"
 
 ALL_PATIENTS_CORRELATION <- TRUE

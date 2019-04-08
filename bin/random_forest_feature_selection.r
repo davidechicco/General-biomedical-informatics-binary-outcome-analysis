@@ -80,14 +80,17 @@ libraries(list.of.packages)
 source("./confusion_matrix_rates.r")
 source("./utils.r")
 
-FEATURE_RANKING_PLOT_DEPICTION <- TRUE
+FEATURE_RANKING_PLOT_DEPICTION <- FALSE
 TWO_FEATURES_PLOT <- FALSE
 
 patients_data <- read.csv(fileNameData, header = TRUE, sep =",");
 cat("Read data from file ", fileNameData, "\n", sep="")
 
+# rename target
+names(patients_data)[names(patients_data) == targetName] <- "target"
+
 cat("application of dplyr::select()\n")
-patients_data <- patients_data%>%dplyr::select(-targetName,targetName)
+patients_data <- patients_data%>%dplyr::select(-target,target)
 target_index <- dim(patients_data)[2]    
 
 num_to_return <- 1
@@ -115,7 +118,7 @@ for(exe_i in 1:execution_number)
 
 
     cat("application of randomForest()\n")
-    rf_output <- randomForest(as.factor(patients_data[[targetName]]) ~ ., data=patients_data, importance=TRUE, proximity=TRUE)
+    rf_output <- randomForest(as.factor(patients_data$target) ~ ., data=patients_data, importance=TRUE, proximity=TRUE)
     # rf_output <- randomForest(as.factor(targetName) ~ ., data=patients_data, importance=TRUE, proximity=TRUE)
     
 
@@ -123,10 +126,6 @@ for(exe_i in 1:execution_number)
     
     mergedRankingGeneralRank <- agregateTwoSortedRankings(dd, "MeanDecreaseAccuracy", "MeanDecreaseGini")
     
-    lastCol <- dim(mergedRankingGeneralRank)[2]
-
-    featuresCol <- 6
-
     rownames(mergedRankingGeneralRank) <- (removeDot(removeUnderscore(rownames(mergedRankingGeneralRank))))
     mergedRankingGeneralRank$features <- removeDot(removeUnderscore(mergedRankingGeneralRank$features))
 
@@ -151,9 +150,9 @@ allExecutionsFinalRanking$MeanDecreaseAccuracy <- allExecutionsFinalRanking$Mean
 allExecutionsFinalRanking$MeanDecreaseGini <- allExecutionsFinalRanking$MeanDecreaseGini / execution_number
 allExecutionsFinalRanking$finalPos <- allExecutionsFinalRanking$finalPos / execution_number
 
-# let's eliminate the target index from the rank
-targetRow <-  which(allExecutionsFinalRanking==targetName)
-allExecutionsFinalRanking <- allExecutionsFinalRanking[-c( which(allExecutionsFinalRanking==targetName)), ]
+# # let's eliminate the target index from the rank
+# targetRow <-  which(allExecutionsFinalRanking==targetName)
+# allExecutionsFinalRanking <- allExecutionsFinalRanking[-c( which(allExecutionsFinalRanking==targetName)), ]
 
 cat("\n\n\n\n== final ranking after ", execution_number, " executions == \n", sep="")
 

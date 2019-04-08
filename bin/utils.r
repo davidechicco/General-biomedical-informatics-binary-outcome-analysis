@@ -64,6 +64,11 @@ removeDot <- function (thisString)
 }
 
 
+# function that prints tgree decimals of a number
+dec_three <- function(x) {
+  return (format(round(x, 3), nsmall = 3));
+}
+
 # function that prints two decimals of a number
 dec_two <- function(x) {
   return (format(round(x, 2), nsmall = 2));

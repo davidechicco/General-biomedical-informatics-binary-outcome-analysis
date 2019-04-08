@@ -1,8 +1,8 @@
 setwd(".")
 options(stringsAsFactors = FALSE)
 
-fileNameData <-  "../data/Mesothelioma_data_set_EDITED.csv" 
-targetName <- "class_of_diagnosis"
+fileNameData <-  "/home/davide/projects/breast_cancer_Coimbra/data/dataR2_EDITED.csv"
+targetName <- "DIAGNOSIS"
 
 # args = commandArgs(trailingOnly=TRUE)
 # if (length(args)<EXP_ARG_NUM) {
@@ -27,8 +27,11 @@ source("./utils.r")
 patients_data <- read.csv(fileNameData, header = TRUE, sep =",");
 cat("Read data from file ", fileNameData, "\n", sep="")
 
+# rename target
+names(patients_data)[names(patients_data) == targetName] <- "target"
+
 # put the target on the last right position
-patients_data <- patients_data%>%dplyr::select(-targetName,targetName)
+patients_data <- patients_data%>%dplyr::select(-target, target)
 
 target_index <- dim(patients_data)[2]
 
@@ -39,7 +42,7 @@ allExecutionsFinalRanking <- data.frame(Doubles=double(),
                  Characters=character(),
                  stringsAsFactors=FALSE)
 
-execution_number <- 20
+execution_number <- 100
 cat("Number of executions = ", execution_number, "\n", sep="")
 for(exe_i in 1:execution_number)
 {

@@ -3,7 +3,7 @@ options(stringsAsFactors = FALSE)
 
 EXP_ARG_NUM <- 2
 
-fileName <-  "/home/davide/projects/breast_cancer_Coimbra/data/dataR2_EDITED.csv"
+fileName <- "/home/davide/projects/breast_cancer_Coimbra/data/dataR2_EDITED.csv"
 targetName <- "DIAGNOSIS"
 
 list.of.packages <- c("easypackages", "OneR", "class", "gmodels", "dplyr", "pastecs")
@@ -26,8 +26,11 @@ threshold <- 0.5
 patients_data <- read.csv(file=fileName,head=TRUE,sep=",",stringsAsFactors=FALSE)
 cat("fileName = ", fileName, "\n", sep="")
 
+# rename target
+names(patients_data)[names(patients_data) == targetName] <- "target"
+
 # let's put the target label last on the right 
-patients_data <- patients_data%>%select(-targetName,targetName)
+patients_data <- patients_data%>%dplyr::select(-target,target)
 patients_data_original <- patients_data
 
 execution_number <- 100

@@ -54,7 +54,7 @@ tableAnalysis <- function(dataframe_patients)
 
 ## part to edit manually ##
 
-fileName <-   "/home/dave/Downloads/breast_cancer_Coimbra_dataR2.csv"
+fileName <-   "/home/davide/projects/breast_cancer_Coimbra/data/dataR2.csv"
 targetName <- "Classification"
 ABNORMAL_TARGET_CONDITION <- 1
 NORMAL_TARGET_CONDITION <- 0

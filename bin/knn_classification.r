@@ -19,8 +19,9 @@ EXP_ARG_NUM <- 2
 # fileName <- "../data/dataset_edited_without_time_NORM.csv"
 # targetName <- "death_event"
 
-fileName <- "/home/davide/projects/mesothelioma_project/mesothelioma-diagnosis-predictions/Mesothelioma_data_set_33features.csv"
-targetName <- "class.of.diagnosis"
+fileName <-  "/home/davide/projects/heart-failure-gene-expression-analysis/temp/patients_data_dataset_dim_red_svd5_file_1052379918.csv" 
+targetName <- "diagnosis"
+
 
 # fileName <- "../../../projects/sepsis_severity_ICU/data/sepsis_severity_dataset_edited_2019-02-11.csv"
 # targetName <- "ADDED.survival"

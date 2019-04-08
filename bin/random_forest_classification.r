@@ -20,12 +20,14 @@ TRAIN_SET_OVERSAMPLING_SYNTHETIC <- FALSE
 #   targetName <- args[2]
 # }
 
+fileName <- "/home/davide/projects/breast_cancer_Coimbra/data/dataR2_EDITED.csv"
+targetName <- "DIAGNOSIS"
 
 # fileName <- "../data/dataset_edited_without_time.csv"
 # targetName <- "death_event"
 
-fileName <- "../../../projects/sepsis_severity_ICU/data/sepsis_severity_dataset_edited_2019-02-11.csv"
-targetName <- "ADDED.survival"
+# fileName <- "../../../projects/sepsis_severity_ICU/data/sepsis_severity_dataset_edited_2019-02-11.csv"
+# targetName <- "ADDED.survival"
 
 cat("fileName: ", fileName, "\n", sep="")
 cat("targetName: ", targetName, "\n", sep="")
@@ -168,9 +170,6 @@ for(exe_i in 1:execution_number)
  cat("Number of executions = ", execution_number, "\n", sep="")
  # statistics on the dataframe of confusion matrices
  statDescConfMatr <- stat.desc(confMatDataFrame)
-medianRowResults <- (statDescConfMatr)[c("median"),]
-cat("\n\n")
-print(dec_two(medianRowResults))
-meanRowResults <- (statDescConfMatr)[c("mean"),]
-print(dec_two(meanRowResults))
+medianAndMeanRowResults <- (statDescConfMatr)[c("median", "mean"),]
+print(dec_two(medianAndMeanRowResults))
 cat("\n\n=== === === ===\n")

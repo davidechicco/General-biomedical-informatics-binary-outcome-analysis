@@ -1,8 +1,8 @@
 setwd(".")
 options(stringsAsFactors = FALSE)
 
-fileNameData <-  "../data/Mesothelioma_data_set_EDITED.csv" 
-targetName <- "class_of_diagnosis"
+fileNameData <-  "/home/davide/projects/breast_cancer_Coimbra/data/dataR2_EDITED.csv"
+targetName <- "DIAGNOSIS"
 
 # args = commandArgs(trailingOnly=TRUE)
 # if (length(args)<EXP_ARG_NUM) {
@@ -28,8 +28,13 @@ thisMethod <- "svmRadial"
 patients_data <- read.csv(file=fileNameData,head=TRUE,sep=",",stringsAsFactors=FALSE)
 cat("fileNameData = ", fileNameData, "\n", sep="")
 
+# rename target
+names(patients_data)[names(patients_data) == targetName] <- "target"
+
 # put the target on the last right position
-patients_data <- patients_data%>%select(-targetName,targetName)
+patients_data <- patients_data%>%select(-target, target)
+
+
 patients_data <- patients_data[sample(nrow(patients_data)),] # shuffle the rows
 
 totalElements <- dim(patients_data)[1]
@@ -63,16 +68,15 @@ for(exe_i in 1:execution_number)
     cat("\n\n[Execution number ", exe_i," of the ",thisMethod,"]\n")
 
     patients_data <- patients_data[sample(nrow(patients_data)),] # shuffle the rows again
-    patients_data_labels <- (patients_data[, target_index])
 
-    num_folds <- 200 # 200
+    num_folds <- 200
     num_feature <- c(ncol(patients_data))
 
     cat("kernel: ", thisMethod,"\n")
     
 
     # svm for feature selection
-    svmProfile <- rfe(patients_data, patients_data_labels,
+    svmProfile <- rfe(patients_data[,1:(target_index-1)], patients_data$target,
                     sizes = num_feature,
                     rfeControl = rfeControl(functions = caretFuncs, number = num_folds),
                     method = thisMethod)

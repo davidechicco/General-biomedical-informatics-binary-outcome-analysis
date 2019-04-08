@@ -13,7 +13,7 @@ targetName <- "DIAGNOSIS"
 #   targetName <- args[2]
 # }
 
-list.of.packages <- c("easypackages", "e1071","PRROC", "caret", "fastAdaboost", "dplyr", "pastecs", "kernlab")
+list.of.packages <- c("easypackages", "e1071","PRROC", "caret", "fastAdaboost", "dplyr", "pastecs", "kernlab", "FSelector")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 
@@ -23,7 +23,7 @@ libraries(list.of.packages)
 source("./confusion_matrix_rates.r")
 source("./utils.r")
 
-thisMethod <- "svmLinear"
+thisMethod = "One rule feature selection"
 
 patients_data <- read.csv(file=fileNameData,head=TRUE,sep=",",stringsAsFactors=FALSE)
 cat("fileNameData = ", fileNameData, "\n", sep="")
@@ -32,7 +32,7 @@ cat("fileNameData = ", fileNameData, "\n", sep="")
 names(patients_data)[names(patients_data) == targetName] <- "target"
 
 # put the target on the last right position
-patients_data <- patients_data%>%select(-target, target)
+patients_data <- patients_data%>%dplyr::select(-target, target)
 
 
 patients_data <- patients_data[sample(nrow(patients_data)),] # shuffle the rows
@@ -68,40 +68,36 @@ for(exe_i in 1:execution_number)
     cat("\n\n[Execution number ", exe_i," of the ",thisMethod,"]\n")
 
     patients_data <- patients_data[sample(nrow(patients_data)),] # shuffle the rows again
-
-    num_folds <-  200
-    num_feature <- c(ncol(patients_data))
-
-    cat("kernel: ", thisMethod,"\n")
-    
-
-    # svm for feature selection
-    svmProfile <- rfe(patients_data[,1:(target_index-1)], patients_data$target,
-                    sizes = num_feature,
-                    rfeControl = rfeControl(functions = caretFuncs, number = num_folds),
-                    method = thisMethod)
+ 
+#     # svm for feature selection
+#     svmProfile <- rfe(patients_data[,1:(target_index-1)], patients_data$target,
+#                     sizes = num_feature,
+#                     rfeControl = rfeControl(functions = caretFuncs, number = num_folds),
+#                     method = thisMethod)
+     
+    tmp <- oneR((target)~., patients_data)
                     
-                    
-    featureImportance <- varImp(svmProfile, scale=FALSE)
+    # featureImportance <- rownames(tmp[order(tmp$attr_importance,decreasing = TRUE),,drop=FALSE])
+    featureImportance <- tmp
     featureImportance$feature <- rownames(featureImportance)
 
     rownames(featureImportance) <- removeUnderscoreAndDot(rownames(featureImportance))
     featureImportance$feature <- removeUnderscoreAndDot(featureImportance$feature)
 
     cat("== temporary ranking == \n")
-    print(head(featureImportance[c("Overall")]))
+    print(head(featureImportance[c("attr_importance")]))
     
     
     if (exe_i == 1) {
-        allExecutionsFinalRanking <- featureImportance[c("Overall")]
+        allExecutionsFinalRanking <- featureImportance[c("attr_importance")]
     } else {
-        allExecutionsFinalRanking$"Overall" <- allExecutionsFinalRanking$"Overall" + featureImportance$"Overall"
+        allExecutionsFinalRanking$"attr_importance" <- allExecutionsFinalRanking$"attr_importance" + featureImportance$"attr_importance"
     } 
 }
 
 cat("\n\n\n == final ranking after ", execution_number, " executions\n", sep="")
 
-allExecutionsFinalRanking$"finalOverall" <- allExecutionsFinalRanking$"Overall" / execution_number
+allExecutionsFinalRanking$"finalOverall" <- allExecutionsFinalRanking$"attr_importance" / execution_number
 allExecutionsFinalRanking <- allExecutionsFinalRanking[order(-allExecutionsFinalRanking$"finalOverall"), ]
 allExecutionsFinalRanking$"finalPos" <- c(1:dim(allExecutionsFinalRanking)[1])
 
