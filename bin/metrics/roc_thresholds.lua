@@ -140,13 +140,13 @@ function roc_thresholds(responses, labels)
 	
 	
 	
--- 	-- print("(#responses_sorted)[1]="..(#responses_sorted)[1]);
-	print("#FPplusFN="..#FPplusFN)
+ 	-- print("(#responses_sorted)[1]="..(#responses_sorted)[1]);
+	-- print("#FPplusFN="..#FPplusFN)
 	table.sort(FPplusFN)
 	minError = FPplusFN[1];
 	minErrorIndex = getIndex(FPplusFN, minError, #FPplusFN);
  	globalThreshold =  responses_sorted[minErrorIndex]
-	print("minError="..minError.."\tminErrorIndex="..minErrorIndex .."\tglobalThreshold ="..globalThreshold);
+	-- print("minError="..minError.."\tminErrorIndex="..minErrorIndex .."\tglobalThreshold ="..globalThreshold);
 	
 	-- if (#responses_sorted)[1] ~= #FPplusFN then print("((#responses_sorted)[1] ~= #FPplusFN) Error: not all the FPplusFN values have been computed"); os.exit(); end
 	
