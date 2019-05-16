@@ -4,6 +4,10 @@ options(stringsAsFactors = FALSE)
 fileNameData <-  "/home/davide/projects/breast_cancer_Coimbra/data/dataR2_EDITED.csv"
 targetName <- "DIAGNOSIS"
 
+# fileNameData <- "/home/davide/projects/heart-failure-gene-expression-analysis/temp/STEMI_patients_data_heart_failure_without_controls9013975.csv"
+# targetName <- "added_diagnosis"
+
+
 # args = commandArgs(trailingOnly=TRUE)
 # if (length(args)<EXP_ARG_NUM) {
 #   stop("At least two argument must be supplied (input files)", call.=FALSE)
