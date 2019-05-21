@@ -8,7 +8,16 @@ setwd(".")
 filename <-   "/home/davide/projects/breast_cancer_Coimbra/data/dataR2.csv"
 TARGET_LABEL <- "Classification"
 
-CORRELATIONS_PLOTS <- FALSE
+resultsFolderPath = "../results/"
+
+SAVE_CORRELATIONS_PLOTS <- FALSE
+SAVE_CORRELATIONS_LISTS <- TRUE
+
+if (SAVE_CORRELATIONS_PLOTS == TRUE || SAVE_CORRELATIONS_LISTS==TRUE){
+        mkDirResultsCommand <- paste0("mkdir -p ", resultsFolderPath)
+        system(mkDirResultsCommand)
+        cat("just run the command: ", mkDirResultsCommand, "\n", sep="")
+}
 
 # Data load
 
@@ -181,19 +190,40 @@ dataframeChiSquared$feature <- rownames(dataframeChiSquared)
 
 # let's create the plots
 
-if(CORRELATIONS_PLOTS == TRUE) {    
-    
+if(SAVE_CORRELATIONS_PLOTS == TRUE) {    
+
     x_upper_lim <- 300
-    barPlotOfRanking(dataframeShapiro, abs(log(dataframeShapiro$"sortedVectorShapiro")), dataframeShapiro$feature, dataframeShapiro$pos, exe_num, "feature", "abs(log(Shapiro-Wilk))", x_upper_lim)
-    
-    
-    x_upper_lim <- 1
-    barPlotOfRanking(dataframeWilkoxon, dataframeWilkoxon$"sortedVectorWilcoxon", dataframeWilkoxon$feature, dataframeWilkoxon$pos, exe_num, "feature", "Wilcoxon", x_upper_lim)
+    barPlotOfRanking(dataframeShapiro, abs(log(dataframeShapiro$"sortedVectorShapiro")), dataframeShapiro$feature, dataframeShapiro$pos, exe_num, "feature", "abs(log(Shapiro-Wilk))", x_upper_lim, resultsFolderPath)    
     
     x_upper_lim <- 1
-    barPlotOfRanking(dataframeKruskal, dataframeKruskal$"sortedVectorKruskal", dataframeKruskal$feature, dataframeKruskal$pos, exe_num, "feature", "Kruskal", x_upper_lim)
+    barPlotOfRanking(dataframeWilkoxon, dataframeWilkoxon$"sortedVectorWilcoxon", dataframeWilkoxon$feature, dataframeWilkoxon$pos, exe_num, "feature", "Wilcoxon", x_upper_lim, resultsFolderPath)
     
     x_upper_lim <- 1
-    barPlotOfRanking(dataframeChiSquared, dataframeChiSquared$"sortedVectorChi", dataframeChiSquared$feature, dataframeChiSquared$pos, exe_num, "feature", "ChiSquared", x_upper_lim)
+    barPlotOfRanking(dataframeKruskal, dataframeKruskal$"sortedVectorKruskal", dataframeKruskal$feature, dataframeKruskal$pos, exe_num, "feature", "Kruskal", x_upper_lim, resultsFolderPath)
     
+    x_upper_lim <- 1
+    barPlotOfRanking(dataframeChiSquared, dataframeChiSquared$"sortedVectorChi", dataframeChiSquared$feature, dataframeChiSquared$pos, exe_num, "feature", "ChiSquared", x_upper_lim, resultsFolderPath)
+    
+}
+
+if(SAVE_CORRELATIONS_LISTS == TRUE){
+
+    
+    tableFileShapiro <- paste0(resultsFolderPath,"Shapiro_",exe_num, ".csv")
+    tableFileWilcoxon <- paste0(resultsFolderPath,"Wilcoxon_",exe_num, ".csv")
+    tableFileKruskal <- paste0(resultsFolderPath,"Kruskal_",exe_num, ".csv")
+    tableFileChiSquared <- paste0(resultsFolderPath,"chiSquared_",exe_num, ".csv")
+
+    write.table(dataframeShapiro[,c(3,1)], file=tableFileShapiro, sep=",", col.names=TRUE, row.names=FALSE)
+    cat("Saved file ", tableFileShapiro, "\n")
+    
+    write.table(dataframeWilkoxon[,c(3,1)], file=tableFileWilcoxon, sep=",", col.names=TRUE, row.names=FALSE)
+    cat("Saved file ", tableFileWilcoxon, "\n")
+    
+    write.table(dataframeKruskal[,c(3,1)], file=tableFileKruskal, sep=",", col.names=TRUE, row.names=FALSE)
+    cat("Saved file ", tableFileKruskal, "\n")
+    
+    write.table(dataframeChiSquared[,c(3,1)], file=tableFileChiSquared, sep=",", col.names=TRUE, row.names=FALSE)
+    cat("Saved file ", tableFileChiSquared, "\n")
+
 }

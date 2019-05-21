@@ -9,8 +9,19 @@ source("./utils.r")
 fileName <-  "/home/davide/projects/breast_cancer_Coimbra/data/dataR2.csv"
 targetName <- "Classification"
 
+resultsFolderPath = "../results/"
+
 ALL_PATIENTS_CORRELATION <- TRUE
-CORRELATIONS_PLOTS <- FALSE
+
+SAVE_CORRELATION_PLOTS <- FALSE
+SAVE_CORRELATIONS_LISTS <- TRUE
+
+if (SAVE_CORRELATION_PLOTS == TRUE || SAVE_CORRELATIONS_LISTS==TRUE){
+        mkDirResultsCommand <- paste0("mkdir -p ", resultsFolderPath)
+        system(mkDirResultsCommand)
+        cat("just run the command: ", mkDirResultsCommand, "\n", sep="")
+}
+
 
 EXP_ARG_NUM <- 2
 MEDIAN_INDEX <- 3
@@ -118,19 +129,32 @@ if (ALL_PATIENTS_CORRELATION == TRUE) {
     abs_t_Dataframe$pos <- c(1:dim(abs_t_Dataframe)[1])
     abs_t_Dataframe$feature <- rownames(abs_t_Dataframe)
     
-    if(CORRELATIONS_PLOTS == TRUE) {    
-    
+    if(SAVE_CORRELATION_PLOTS == TRUE) {    
+       
         x_upper_lim <- 1
-        barPlotOfRanking(absPCCresultDataframe, absPCCresultDataframe$abs_PCC, absPCCresultDataframe$feature, absPCCresultDataframe$pos, exe_num, "feature", "abs (PCC)", x_upper_lim)
+        barPlotOfRanking(absPCCresultDataframe, absPCCresultDataframe$abs_PCC, absPCCresultDataframe$feature, absPCCresultDataframe$pos, exe_num, "feature", "abs_(PCC)", x_upper_lim, resultsFolderPath)
 
         x_upper_lim <- 300
-        barPlotOfRanking(p_values_resultDataframe, abs(log(p_values_resultDataframe$p)), p_values_resultDataframe$feature, (p_values_resultDataframe$pos), exe_num, "feature", "abs(log(p-value))", x_upper_lim)
+        barPlotOfRanking(p_values_resultDataframe, abs(log(p_values_resultDataframe$p)), p_values_resultDataframe$feature, (p_values_resultDataframe$pos), exe_num, "feature", "abs(log(p-value))", x_upper_lim, resultsFolderPath)
 
         x_upper_lim <- 100
-        barPlotOfRanking(abs_t_Dataframe, abs_t_Dataframe$abs_t, abs_t_Dataframe$feature, (abs_t_Dataframe$pos), exe_num, "feature", "Student's abs(t)", x_upper_lim)    
+        barPlotOfRanking(abs_t_Dataframe, abs_t_Dataframe$abs_t, abs_t_Dataframe$feature, (abs_t_Dataframe$pos), exe_num, "feature", "Students_abs(t)", x_upper_lim, resultsFolderPath)    
+    }
+    
+    if(SAVE_CORRELATIONS_LISTS == TRUE){    
+
+        tableFilePearson <- paste0(resultsFolderPath, "Pearson_",exe_num, ".csv")
+        tableFileStudentsT <- paste0(resultsFolderPath, "StudentsT_",exe_num, ".csv")
+
+        write.table(absPCCresultDataframe[,c(3,1)], file=tableFilePearson, sep=",", col.names=TRUE, row.names=FALSE)
+        cat("Saved file ", tableFilePearson, "\n")
+        
+        write.table(abs_t_Dataframe[,c(3,1)], file=tableFileStudentsT, sep=",", col.names=TRUE, row.names=FALSE)
+        cat("Saved file ", tableFileStudentsT, "\n")
+
     }
 
 }
 
 
-# (t(summary(patients_data)))[,c(1,3,4,6)]
+
