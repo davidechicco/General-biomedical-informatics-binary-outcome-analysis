@@ -25,6 +25,73 @@ library("easypackages")
 libraries(list.of.packages)
 
 USELESS_VALUE <- -2
+MAX_NAS_IN_COL_PERC <- 50
+MAX_NAS_IN_ROW_PERC <- 50
+
+
+# # # Remove NAs -- start # # # 
+
+# countNAsRows
+removeSometNAsRows <- function (thisDataFrame)
+{
+    cat("\n== countNAsRows() ==\n")
+     loopLength <- nrow(thisDataFrame)
+
+    for(j in loopLength:1) { 
+        NAs_num <-  sum(is.na(thisDataFrame[j,]))
+        NAs_perc <- NAs_num * 100 / ncol(thisDataFrame)
+        
+        if(((j*100)/loopLength %% 10)==0) {cat("(j=", j, ") ", sep="")}
+        
+        if (NAs_perc > MAX_NAS_IN_ROW_PERC) {
+            # cat(j, ")", (thisDataFrame[j, ])$patient, " ", (NAs_perc), "%\n", sep="")
+            
+            thisDataFrame <- thisDataFrame[-j, ]
+            loopLength = loopLength - 1
+        }
+    }
+    
+      return(thisDataFrame)
+}
+
+# countNAs
+summaryAllColumns <- function (thisDataFrame)
+{
+    cat("\n== summaryAllColumns() ==\n")
+
+    loopLength <- ncol(thisDataFrame)
+    
+    for(i in 1:loopLength) { 
+        
+            cat(colnames(allDataSubFeaturesNew)[i], " summary: \n", sep="")
+            print(summary(allDataSubFeaturesNew[,i]))
+            cat("\n")
+        } 
+}
+
+# countNAs
+removeSometNAsColumns <- function(thisDataFrame)
+{
+    cat("\n== removeSometNAsColumns() ==\n")
+
+    loopLength <- ncol(thisDataFrame)
+    
+    for(i in loopLength:1) { 
+        NAs_num <-  sum(is.na(thisDataFrame[[i]]))
+        NAs_perc <- NAs_num * 100 / nrow(thisDataFrame)
+        cat(colnames(thisDataFrame)[i], " ", dec_two(NAs_perc), "%\n", sep="")
+        
+            if(NAs_perc > MAX_NAS_IN_COL_PERC) { 
+                thisDataFrame[,i] <- NULL
+                loopLength <- loopLength-1
+                cat("dropped\n")
+            }
+        }
+ 
+  return(thisDataFrame)
+}
+
+# # # Remove NAs -- end # # # 
 
 # retrieveMostSimilarRow
 retrieveMostSimilarRow <- function(rowDataFrame, thisDataFrame) 
@@ -146,6 +213,11 @@ if(length(new.packages)) install.packages(new.packages)
 cat("datasetFileName: ", datasetFileName, "\n", sep="")
 patients_data <- read.csv(datasetFileName, header = TRUE, sep =",");
 cat("Read data from file ", datasetFileName, "\n", sep="")
+
+cat("before NAs removal: ", nrow(patients_data), " rows and ", ncol(patients_data), "\n", sep="")
+patients_data <- removeSometNAsColumns(patients_data)
+
+cat("after NAs removal: ", nrow(patients_data), " rows and ", ncol(patients_data), "\n", sep="")
 
 num_to_return <- 1
 upper_num_limit <- 10000000
