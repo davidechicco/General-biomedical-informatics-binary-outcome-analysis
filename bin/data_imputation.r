@@ -1,4 +1,21 @@
 setwd(".")
+options(stringsAsFactors = FALSE)
+
+args = commandArgs(trailingOnly=TRUE)
+
+# test if there is at least one argument: if not, return an error
+if (length(args)==0) {
+  stop("At least one argument must be supplied ", call.=FALSE)
+} 
+
+datasetFileName <- toString(args[1])
+cat("Input parameter read: ", datasetFileName, "\n", sep="")
+
+
+# datasetFileName <-  "/home/davide/projects/sepsis_neonatal_ICU/data/journal.pone.0212665.s007.csv"
+# datasetFileName <-  "/home/davide/projects/hepatocellular_carcinoma/data/hcc-data_EDITED_NAs.csv"
+
+# packages
 
 list.of.packages <- c("easypackages", "nnet", "pastecs")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
@@ -125,7 +142,7 @@ list.of.packages <- c("easypackages", "clusterSim", "PRROC", "e1071", "rpart",  
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 
-datasetFileName <-  "/home/davide/projects/sepsis_neonatal_ICU/data/journal.pone.0212665.s007.csv"
+
 cat("datasetFileName: ", datasetFileName, "\n", sep="")
 patients_data <- read.csv(datasetFileName, header = TRUE, sep =",");
 cat("Read data from file ", datasetFileName, "\n", sep="")
@@ -140,6 +157,6 @@ datasetFileNameWithoutExtension <- strsplit(datasetFileName, ".csv")[[1]]
 dataImputationFile <- paste0(datasetFileNameWithoutExtension, "_cosineDist_data_imputed_", exe_num, ".csv")
 
 cat("The imputed dataset will be saved in the ", dataImputationFile, " file\n", sep="")
-write.csv(patients_data_new_imputed, file=dataImputationFile)
+write.csv(patients_data_new_imputed, file=dataImputationFile, row.names=FALSE)
 
 
