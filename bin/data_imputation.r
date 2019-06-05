@@ -216,7 +216,7 @@ cat("Read data from file ", datasetFileName, "\n", sep="")
 
 cat("before NAs removal: ", nrow(patients_data), " rows and ", ncol(patients_data), "\n", sep="")
 patients_data <- removeSometNAsColumns(patients_data)
-
+patients_data <- removeSometNAsRows(patients_data)
 cat("after NAs removal: ", nrow(patients_data), " rows and ", ncol(patients_data), "\n", sep="")
 
 num_to_return <- 1
