@@ -164,7 +164,7 @@ for(exe_i in 1:execution_number)
     cat("\n[Training the SVM model (with the OPTIMIZED hyper-parameter C=",c_array[bestCindex],") on training set & applying the SVM to the test set]\n", sep="")
     #patients_data_test_pred <- knn(train = patients_data_train, test = patients_data_test, cl = patients_data_train_labels, k=bestK)
 
-    svm_model_new <- svm(patients_data_train_labels ~ ., cost=c_array[bestCindex], data=patients_data_train, method = "C-classification", kernel = "linear")
+    svm_model_new <- svm(patients_data_train_labels ~ ., cost=c_array[bestCindex], data=patients_data_train, method = "C-classification", kernel = "radial")
     patients_data_test_pred <- predict(svm_model_new, patients_data_test)
     
     thisConfMat <- confusion_matrix_rates(patients_data_test_labels, patients_data_test_pred, "@@@ Test set @@@")
