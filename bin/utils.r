@@ -96,6 +96,29 @@ if (is.finite(x)) {
     }
 }
 
+# function that prints two decimals of a number with sign
+signed_dec_three <- function(x) {
+
+if (is.finite(x)) {
+
+                if (x>0) { 
+                    
+                        sign <- "+";   
+                        return (paste(sign, toString(format(round(x, 2), nsmall = 2)), sep=""))
+                
+                    } else {
+                    
+                            return (dec_three(x))
+                    }    
+    } else {
+    
+    
+    return ("indef")
+    
+    }
+}
+
+
 
 
 # Function that reads in a vector made of binary values and prints the imbalance rates
