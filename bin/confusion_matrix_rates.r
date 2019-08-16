@@ -1,7 +1,7 @@
 options(stringsAsFactors = FALSE)
 # library("clusterSim")
 
-list.of.packages <- c("easypackages", "PRROC", "e1071")
+list.of.packages <- c("easypackages", "PRROC", "e1071", "Metrics", "MLmetrics")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 
@@ -10,6 +10,34 @@ libraries(new.packages)
 script_dir <- dirname(sys.frame(1)$ofile)
 cat("script_dir: ", script_dir, "\n", sep="")
 source(paste0(script_dir,"/utils.r"))
+
+# regression rates
+regression_rates <- function(actual_labels, predicted_values, keyword)
+{
+
+    thisRMSE <- rmse(actual_labels, predicted_values)
+    thisMAE <- mae(actual_labels, predicted_values)
+    thisMSE <- mse(actual_labels, predicted_values)
+    thisSMAPE <- smape(actual_labels, predicted_values)
+    
+    thisR2score <- MLmetrics::R2_Score(predicted_values, actual_labels) # (predicted_values, actual_labels) # notice the swap
+    # R2_Score(y_pred, y_true)
+
+    cat("  @@@ regression :: \t RMSE \t MAE \t MSE  \t SMAPE \t R^2 \n")
+    cat("  @@@ regression :: \t ", dec_three(thisRMSE), " \t ", dec_three(thisMAE), " \t ", dec_three(thisMSE),  " \t ", dec_three(thisSMAPE),  " \t ", dec_three(thisR2score)," \n", sep="")
+    
+    NUM_METRICS <- 5
+    outputDataframe <- matrix(ncol=NUM_METRICS, nrow=1)
+    outputDataframe[,1] <- thisRMSE
+    outputDataframe[,2] <- thisMAE
+    outputDataframe[,3] <- thisMSE
+    outputDataframe[,4] <- thisSMAPE
+    outputDataframe[,5] <- thisR2score
+    colnames(outputDataframe) <- c("RMSE", "MAE", "MSE", "SMAPE", "R^2")
+
+    return(outputDataframe)
+}
+
 
 # Confusion matrix rates
 confusion_matrix_rates <- function (actual_labels, predicted_values, keyword)
@@ -66,7 +94,7 @@ confusion_matrix_rates <- function (actual_labels, predicted_values, keyword)
   
   cat("\n\n",keyword,"\t MCC \t F1_score \t accuracy \t TP_rate \t TN_rate \t PR AUC \t ROC AUC\n")
   cat(keyword,"      ", sep="")
-  cat(signed_dec_three(thisMcc), " \t ",  sep="")
+  cat(dec_three(thisMcc), " \t ",  sep="")
   cat(dec_three(f1_score), " \t ",  sep="")
   cat(dec_three(accuracy), " \t ",  sep="")
   cat(dec_three(recall), " \t ",  sep="")
