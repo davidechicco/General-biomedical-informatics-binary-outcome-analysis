@@ -20,8 +20,8 @@ TRAIN_SET_OVERSAMPLING_SYNTHETIC <- FALSE
 #   targetName <- args[2]
 # }
 
-fileName <- "/home/davide/projects/breast_cancer_Coimbra/data/dataR2_EDITED.csv"
-targetName <- "DIAGNOSIS"
+fileName <- "/home/davide/projects/AdvantagesOfMCC/data/neuroblastoma.csv"
+targetName <- "alive"
 
 # fileName <- "../data/dataset_edited_without_time.csv"
 # targetName <- "death_event"
@@ -62,7 +62,7 @@ allFeaturesFormula <- as.formula(paste(as.factor(colnames(patients_data)[target_
 
 # cycle of executions
 
-execution_number <- 100
+execution_number <- 10
 cat("Number of executions = ", execution_number, "\n", sep="")
 for(exe_i in 1:execution_number)
 {

@@ -79,7 +79,7 @@ removeSometNAsColumns <- function(thisDataFrame)
     for(i in loopLength:1) { 
         NAs_num <-  sum(is.na(thisDataFrame[[i]]))
         NAs_perc <- NAs_num * 100 / nrow(thisDataFrame)
-        cat(colnames(thisDataFrame)[i], " ", dec_two(NAs_perc), "%\n", sep="")
+        cat(colnames(thisDataFrame)[i], " ", dec_three(NAs_perc), "%\n", sep="")
         
             if(NAs_perc > MAX_NAS_IN_COL_PERC) { 
                 thisDataFrame[,i] <- NULL

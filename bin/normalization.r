@@ -18,7 +18,8 @@ fromStringToNumeric <- function(x_array) {
    return (new_x_num)
 }
 
-datasetFileName <- "/home/davide/projects/heart-failure-gene-expression-analysis/temp/STEMI_patients_data_heart_failure_without_controls9013975_5dimRed_370671003.csv"
+# datasetFileName <- "/home/davide/projects/heart-failure-gene-expression-analysis/temp/STEMI_patients_data_heart_failure_without_controls9013975_5dimRed_370671003.csv"
+datasetFileName <- "/home/davide/projects/heart-failure-gene-expression-analysis/temp/STEMI_patients_data_heart_failure_without_controls9013975_dim10red_657327508.csv"
 targetName <- "added_diagnosis"
 
 list.of.packages <- c("easypackages", "dplyr")
@@ -53,10 +54,10 @@ patients_data_num <- patients_data
 num_of_columns <- dim(patients_data_num)[2]
 num_of_features <- num_of_columns - 1
 
-target_column_index <- grep(targerName, colnames(patients_data_num))
+target_column_index <- grep(targetName, colnames(patients_data_num))
 
 cat("num_of_features = ", num_of_features, "\n")
-cat("the target is ", targerName ,", column index =", target_column_index, "\n")
+cat("the target is ", targetName ,", column index =", target_column_index, "\n")
 
 for(i in 1:(num_of_features))
 {
@@ -68,9 +69,12 @@ patients_data_num[,target_column_index] <- patients_data[,target_column_index]
 
 round(prop.table(table(patients_data_num[,target_column_index])) * 100, digits = 1)  # it gives the result in the percentage form rounded of to 1 decimal place( and so it’s digits = 1)
 
-cat("[Normalizing the values of the data file (except the ", targerName, " target column)]\n", sep="")
-patients_data_norm <- as.data.frame(lapply(patients_data_num[1:num_of_features], normalize))
-patients_data_norm[,target_column_index] <- patients_data_num[,target_column_index]
+# cat("[Normalizing the values of the data file (except the ", targetName, " target column)]\n", sep="")
+# patients_data_norm <- as.data.frame(lapply(patients_data_num[1:num_of_features], normalize))
+# patients_data_norm[,target_column_index] <- patients_data_num[,target_column_index]
+
+cat("[Normalizing the values of the data file (including the ", targetName, " target column)]\n", sep="")
+patients_data_norm <- as.data.frame(lapply(patients_data_num[1:num_of_columns], normalize))
 
 print(colnames(patients_data_norm))
 colnames(patients_data_norm) <- colnames(patients_data_original) 

@@ -323,7 +323,11 @@ local profile_vett = {}
 
 
 local csv = require("csv")
-local fileName = tostring("/home/davide/projects/cardiovascular_heart_disease/data/dataset_edited_without_time_NORM.csv")
+--local fileName = tostring("/home/davide/projects/cardiovascular_heart_disease/data/dataset_edited_without_time_NORM.csv")
+
+local fileName = tostring("/home/davide/projects/heart-failure-gene-expression-analysis/temp/STEMI_patients_data_heart_failure_without_controls9013975_5dimRed_370671003_NORM_8199309.csv")
+
+
 
 -- local fileName = tostring("/home/davide/projects/heart-failure-gene-expression-analysis/temp/STEMI_patients_data_heart_failure_without_controls9013975_5dimRed_370671003.csv")
 
@@ -365,8 +369,8 @@ DROPOUT_FLAG = false
 MOMENTUM_ALPHA = 0.5
 
 MOMENTUM = false
-LEARN_RATE = 0.01 
-ITERATIONS = 500
+LEARN_RATE = 0.15 -- 0.01
+ITERATIONS = 10000 -- 500
 
 -- LEARN_RATE = 0.01
 -- local hidden_units = 50
@@ -467,7 +471,7 @@ print("TEST_SET_SIZE = "..TEST_SET_SIZE.." elements\n");
 
 
 -- start of the application
-execution_number = 100
+execution_number = 2
 
 for exe=1,execution_number do
 

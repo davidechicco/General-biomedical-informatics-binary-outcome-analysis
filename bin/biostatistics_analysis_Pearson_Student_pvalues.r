@@ -96,15 +96,15 @@ if (ALL_PATIENTS_CORRELATION == TRUE) {
         tValue <- abs((thisTtest$statistic)[[1]])
         pValue <- thisTtest$p.value
         thisAbsPCC <- abs(cor(patients_data[,i], patients_data[,targetIndex], method=c("pearson")))
-        conf_int_start <- dec_two((thisTtest$conf.int)[1])
-        conf_int_end <- dec_two((thisTtest$conf.int)[2])
+        conf_int_start <- dec_three((thisTtest$conf.int)[1])
+        conf_int_end <- dec_three((thisTtest$conf.int)[2])
         
         # cat(colnames(patients_data)[i], "\t\t abs(t) \t p-value \t PCC \t conf_int\n", sep="")
-        cat(colnames(patients_data)[i], " ", SEP,"\t", dec_two(tValue), " ", SEP,"\t", dec_two(pValue), " ", SEP,"\t", dec_two(thisAbsPCC), " ", SEP,"\t", conf_int_start, " ", SEP,"\t", conf_int_end, " ", END_OF_ROW,"\n", sep="")
+        cat(colnames(patients_data)[i], " ", SEP,"\t", dec_three(tValue), " ", SEP,"\t", dec_three(pValue), " ", SEP,"\t", dec_three(thisAbsPCC), " ", SEP,"\t", conf_int_start, " ", SEP,"\t", conf_int_end, " ", END_OF_ROW,"\n", sep="")
         
-        # cat("t = ", dec_two(tValue), "\n", sep="")
-        # cat("p-value = ", dec_two(pValue), "\n", sep="")
-        # cat("PCC(", colnames(patients_data)[targetIndex], ", ", colnames(patients_data)[i], ") = ",  dec_two(thisAbsPCC), "\n", sep="")
+        # cat("t = ", dec_three(tValue), "\n", sep="")
+        # cat("p-value = ", dec_three(pValue), "\n", sep="")
+        # cat("PCC(", colnames(patients_data)[targetIndex], ", ", colnames(patients_data)[i], ") = ",  dec_three(thisAbsPCC), "\n", sep="")
       
          allTestsDataframe[i,] <- data.frame(feature = colnames(patients_data)[i], abs_PCC = thisAbsPCC, p=pValue, abs_t=tValue)         
     }

@@ -19,7 +19,10 @@ source("./utils.r")
 num_to_return <- 1
 exe_num <- sample(1:as.numeric(Sys.time()), num_to_return)
 
-datasetFileName <- "/home/davide/projects/heart-failure-gene-expression-analysis/temp/STEMI_patients_data_heart_failure_1052379918.csv"
+# datasetFileName <- "/home/davide/projects/heart-failure-gene-expression-analysis/temp/STEMI_patients_data_heart_failure_1052379918.csv" # original
+
+datasetFileName <-  "/home/davide/projects/heart-failure-gene-expression-analysis/temp/STEMI_patients_data_heart_failure_without_controls9013975.csv"
+
 targetName <- "added_diagnosis"
 patients_dataset <- read.csv(file=datasetFileName,head=TRUE,sep=",",stringsAsFactors=FALSE)
 cat("datasetFileName = ", datasetFileName, "\n", sep="")
@@ -37,7 +40,7 @@ target_index <- dim(patients_dataset)[2]
 dataset_dim_retriever(patients_dataset)
 imbalance_retriever(patients_dataset[,target_index])
 
-trunc <- 5
+trunc <- 10
 
 cat("[Performing dimensionality reduction]\n")
 
@@ -58,7 +61,7 @@ colnames(dim_red_patients_dataset)[NEW_target_index] <- targetName
 dataset_dim_retriever(dim_red_patients_dataset)
 
 datasetFileNameWithoutExtension <- strsplit(datasetFileName, ".csv")[[1]]
-dimRedDatasetFile <- paste0(datasetFileNameWithoutExtension, "_dimRed_", exe_num, ".csv")
+dimRedDatasetFile <- paste0(datasetFileNameWithoutExtension, "_dim", trunc ,"red_", exe_num, ".csv")
 cat("The dimensionality reduction dataset will be saved in the ", dimRedDatasetFile, " file\n", sep="")
 write.csv(dim_red_patients_dataset, file=dimRedDatasetFile, row.names=FALSE)
 

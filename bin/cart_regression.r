@@ -96,6 +96,6 @@ for(exe_i in 1:execution_number)
  statDescConfMatr <- stat.desc(resultDataFrame)
 meanRowResults <- (statDescConfMatr)[c("mean"),]
 cat("\n\n")
-print(dec_two(meanRowResults))
+print(dec_three(meanRowResults))
 cat("\n\n=== === === ===\n")
 

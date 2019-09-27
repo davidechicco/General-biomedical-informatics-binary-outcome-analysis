@@ -25,9 +25,9 @@ tableAnalysis <- function(dataframe_patients)
                 
                 # cat(colnames(dataframe_patients)[i], " ", sep="")             
                 cat(thisFeatureName, " ",  sep="") 
-                cat(SEP, "\t", firstComponentName, " ", SEP, " \t ", firstComponentNum," ", SEP," \t ", dec_two(firstComponentPerc), " ", END_OF_ROW, " \n", sep="")
+                cat(SEP, "\t", firstComponentName, " ", SEP, " \t ", firstComponentNum," ", SEP," \t ", dec_three(firstComponentPerc), " ", END_OF_ROW, " \n", sep="")
                 cat(thisFeatureName, " ", sep="") 
-                cat(SEP, "\t", secondComponentName, " ", SEP, " \t ", secondComponentNum," ", SEP," \t ", dec_two(secondComponentPerc), " ", END_OF_ROW, " \n", sep="")
+                cat(SEP, "\t", secondComponentName, " ", SEP, " \t ", secondComponentNum," ", SEP," \t ", dec_three(secondComponentPerc), " ", END_OF_ROW, " \n", sep="")
                 }
     }
 
@@ -44,7 +44,7 @@ tableAnalysis <- function(dataframe_patients)
                 thisMean <- summary(dataframe_patients[,i])[[MEAN_INDEX]]
                 thisMin <- summary(dataframe_patients[,i])[[MIN_INDEX]]
                 thisMax <- summary(dataframe_patients[,i])[[MAX_INDEX]]
-                cat(thisFeatureName, " ",  SEP, "\t", dec_two(thisMedian), " ",  SEP, "\t", dec_two(thisMean), " ",  SEP, "\t[", dec_two(thisMin), ", ", dec_two(thisMax), "] ", END_OF_ROW, " \n", sep="")
+                cat(thisFeatureName, " ",  SEP, "\t", dec_three(thisMedian), " ",  SEP, "\t", dec_three(thisMean), " ",  SEP, "\t[", dec_three(thisMin), ", ", dec_three(thisMax), "] ", END_OF_ROW, " \n", sep="")
             }
     }
 }
