@@ -1,5 +1,7 @@
 setwd(".")
 options(stringsAsFactors = FALSE)
+cat("\014")
+set.seed(11)
 
 source("./utils.r")
 
@@ -32,7 +34,7 @@ tableAnalysis <- function(dataframe_patients)
     }
 
     cat("\n\n== numeric features ==\n")
-    cat("feature ", SEP, "\t median ", SEP, " \t mean ", SEP, "\t range ", END_OF_ROW, "\n", sep="")
+    cat("feature ", SEP, "\t median ", SEP, " \t mean ", SEP, "\t range ", SEP, "\t sd ", END_OF_ROW, "\n", sep="")
     for(i in 1:(ncol(dataframe_patients))) { 
     
         thisFeatureName <- removeUnderscoreAndDot(colnames(dataframe_patients)[i])
@@ -44,7 +46,8 @@ tableAnalysis <- function(dataframe_patients)
                 thisMean <- summary(dataframe_patients[,i])[[MEAN_INDEX]]
                 thisMin <- summary(dataframe_patients[,i])[[MIN_INDEX]]
                 thisMax <- summary(dataframe_patients[,i])[[MAX_INDEX]]
-                cat(thisFeatureName, " ",  SEP, "\t", dec_three(thisMedian), " ",  SEP, "\t", dec_three(thisMean), " ",  SEP, "\t[", dec_three(thisMin), ", ", dec_three(thisMax), "] ", END_OF_ROW, " \n", sep="")
+                thisSD <- (stat.desc(dataframe_patients[,i]))[c("std.dev")][[1]]
+                cat(thisFeatureName, " ",  SEP, "\t", dec_three(thisMedian), " ",  SEP, "\t", dec_three(thisMean), " ",  SEP, "\t[", dec_three(thisMin), ", ", dec_three(thisMax), "] ", SEP, "\t", dec_three(thisSD), " ",  END_OF_ROW, " \n", sep="")
             }
     }
 }
@@ -54,7 +57,7 @@ tableAnalysis <- function(dataframe_patients)
 
 ## part to edit manually ##
 
-fileName <-   "/home/davide/projects/breast_cancer_Coimbra/data/dataR2.csv"
+fileName <-   "../data/sepsis_severity_dataset_edited_2019-03-22.csv"
 targetName <- "Classification"
 ABNORMAL_TARGET_CONDITION <- 1
 NORMAL_TARGET_CONDITION <- 0

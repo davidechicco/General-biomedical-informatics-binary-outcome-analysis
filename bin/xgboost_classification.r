@@ -1,6 +1,7 @@
 setwd(".")
 options(stringsAsFactors = FALSE)
-
+cat("\014")
+set.seed(11)
 
 fileName <- "../data/dataset_edited_without_time.csv"
 targetName <- "death_event"

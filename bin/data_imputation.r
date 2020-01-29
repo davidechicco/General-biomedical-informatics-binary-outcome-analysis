@@ -1,19 +1,27 @@
 setwd(".")
 options(stringsAsFactors = FALSE)
+cat("\014")
+set.seed(11)
 
-args = commandArgs(trailingOnly=TRUE)
+source("utils.r")
 
-# test if there is at least one argument: if not, return an error
-if (length(args)==0) {
-  stop("At least one argument must be supplied ", call.=FALSE)
-} 
 
-datasetFileName <- toString(args[1])
+SUFF_COS_DIST <- 0.8
+
+# args = commandArgs(trailingOnly=TRUE)
+# 
+# # test if there is at least one argument: if not, return an error
+# if (length(args)==0) {
+#   stop("At least one argument must be supplied ", call.=FALSE)
+# } 
+#
+#datasetFileName <- toString(args[1])
+
+# datasetFileName <- "../GE_data/patients_data.csv"
+datasetFileName <- "../GE_data/GSE11947_gene_expression_with_labels_EDITED.csv"
 cat("Input parameter read: ", datasetFileName, "\n", sep="")
 
 
-# datasetFileName <-  "/home/davide/projects/sepsis_neonatal_ICU/data/journal.pone.0212665.s007.csv"
-# datasetFileName <-  "/home/davide/projects/hepatocellular_carcinoma/data/hcc-data_EDITED_NAs.csv"
 
 # packages
 
@@ -25,8 +33,9 @@ library("easypackages")
 libraries(list.of.packages)
 
 USELESS_VALUE <- -2
-MAX_NAS_IN_COL_PERC <- 50
-MAX_NAS_IN_ROW_PERC <- 50
+MAX_NAS_IN_COL_PERC <- 99
+MAX_NAS_IN_ROW_PERC <- 99
+
 
 
 # # # Remove NAs -- start # # # 
@@ -103,20 +112,21 @@ retrieveMostSimilarRow <- function(rowDataFrame, thisDataFrame)
     
             if(rownames(rowDataFrame) != rownames(thisDataFrame[j,])  && (sum(is.na(thisDataFrame[j,])) == 0))
             {
-                 thisSimi <- similarityWithNas(rowDataFrame, thisDataFrame[j,]) 
-                 simiVector[j] <- thisSimi
-                 
-                 # we stop if we find a cosine distance similar enough
-                 if (thisSimi >= 0.99 ) 
-                 {
-                    break;
-                 }
+                    thisSimi <- similarityWithNas(rowDataFrame, thisDataFrame[j,]) 
+                    simiVector[j] <- thisSimi
+                    # cat("thisSimi = ", thisSimi, "\n")
+                    
+                    # we stop if we find a cosine distance similar enough
+                    if (thisSimi >= SUFF_COS_DIST ) 
+                    {
+                        break;
+                    }
                  
             } else { 
             
-              #  cat("(rownames:", rownames(rowDataFrame), " == ", rownames(thisDataFrame[j,]), ")\t", sep="")
-              # cat("or thisDataFrame[", j,"] contains NAs)\n", sep="")
-                simiVector[j] <- USELESS_VALUE   
+                    #  cat("(rownames:", rownames(rowDataFrame), " == ", rownames(thisDataFrame[j,]), ")\t", sep="")
+                    # cat("or thisDataFrame[", j,"] contains NAs)\n", sep="")
+                    simiVector[j] <- USELESS_VALUE   
             }
        
        # cat("simiVector[", j ,"] = ", simiVector[j], "\n", sep="")
@@ -211,16 +221,16 @@ if(length(new.packages)) install.packages(new.packages)
 
 
 cat("datasetFileName: ", datasetFileName, "\n", sep="")
-patients_data <- read.csv(datasetFileName, header = TRUE, sep =",");
+patients_data <- read.table(datasetFileName, header = TRUE, sep =",", row.names=1, stringsAsFactors=FALSE);
 cat("Read data from file ", datasetFileName, "\n", sep="")
 
-cat("before NAs removal: ", nrow(patients_data), " rows and ", ncol(patients_data), "\n", sep="")
+cat("before NAs removal: ", nrow(patients_data), " rows and ", ncol(patients_data), " columns\n", sep="")
 patients_data <- removeSometNAsColumns(patients_data)
 patients_data <- removeSometNAsRows(patients_data)
-cat("after NAs removal: ", nrow(patients_data), " rows and ", ncol(patients_data), "\n", sep="")
+cat("after NAs removal: ", nrow(patients_data), " rows and ", ncol(patients_data), " columns\n", sep="")
 
 num_to_return <- 1
-upper_num_limit <- 10000000
+upper_num_limit <- 10000
 exe_num <- sample(1:upper_num_limit, num_to_return)
 
 patients_data_new_imputed <- replaceEachNAsRowWithMostSimilarRow(patients_data)
@@ -229,6 +239,6 @@ datasetFileNameWithoutExtension <- strsplit(datasetFileName, ".csv")[[1]]
 dataImputationFile <- paste0(datasetFileNameWithoutExtension, "_cosineDist_data_imputed_", exe_num, ".csv")
 
 cat("The imputed dataset will be saved in the ", dataImputationFile, " file\n", sep="")
-write.csv(patients_data_new_imputed, file=dataImputationFile, row.names=FALSE)
+write.csv(patients_data_new_imputed, file=dataImputationFile, row.names=TRUE)
 
 

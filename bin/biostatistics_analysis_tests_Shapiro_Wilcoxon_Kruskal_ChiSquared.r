@@ -1,4 +1,7 @@
 setwd(".")
+options(stringsAsFactors = FALSE)
+cat("\014")
+set.seed(11)
 
 # Software originally developed by Giuseppe Jurman <jurman@fbk.eu> on 1st March 2019
 # Edited by Davide Chicco <davide.chicco@gmail.com> on 4th March 2019

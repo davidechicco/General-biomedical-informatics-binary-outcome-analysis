@@ -1,9 +1,8 @@
-
-# Script originally mainly written by Giuseppe Jurman <jurman@fbk.eu> on 29th March 2019.
-
-
+## Script originally mainly written by Giuseppe Jurman <jurman@fbk.eu> on 29th March 2019.
 setwd(".")
 options(stringsAsFactors = FALSE)
+cat("\014")
+set.seed(11)
 
 # package loading
 list.of.packages <- c("easypackages", "FSelector", "caret", "MXM", "e1071", "rpart", "xgboost", "randomForest", "kernlab", "mltools", "boot", "PRROC")

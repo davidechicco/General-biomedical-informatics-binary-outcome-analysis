@@ -1,5 +1,7 @@
 setwd(".")
 options(stringsAsFactors = FALSE)
+cat("\014")
+set.seed(11)
 
 list.of.packages <- c("easypackages", "PRROC", "e1071", "randomForest","class", "gmodels", "formula.tools", "RSpectra", "dplyr")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]

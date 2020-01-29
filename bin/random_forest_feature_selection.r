@@ -1,5 +1,7 @@
 setwd(".")
 options(stringsAsFactors = FALSE)
+cat("\014")
+set.seed(11)
 
 # agregateTwoSortedRankings
 agregateTwoSortedRankings <- function(dd, firstColumnName, secondColumnName) {
