@@ -91,29 +91,36 @@ confusion_matrix_rates <- function (actual_labels, predicted_values, keyword)
   accuracy <- (TN+TP) / (TN + TP + FP + FN)
   recall <- TP / (TP + FN)
   specificity <- TN / (TN + FP)
+  balanced_accuracy <- 0.5*(recall+specificity)
+  PPV <-  TP /(TP+FP)
+  NPV <- TN /(TN+FN)
   
-  cat("\n\n",keyword,"\t MCC \t F1_score \t accuracy \t TP_rate \t TN_rate \t PR AUC \t ROC AUC\n")
+  cat("\n\n",keyword,"\tMCC \t F1_score \taccuracy \tTP_rate \tTN_rate \tPPV \t\tNPV \t\tPR AUC \tROC AUC\n")
   cat(keyword,"      ", sep="")
   cat(dec_three(thisMcc), " \t ",  sep="")
-  cat(dec_three(f1_score), " \t ",  sep="")
-  cat(dec_three(accuracy), " \t ",  sep="")
-  cat(dec_three(recall), " \t ",  sep="")
-  cat(dec_three(specificity),  "\t\t ",  sep="")
-  cat(dec_three(prc_auc), "\t\t",  sep="")
+  cat(dec_three(f1_score), " \t \t",  sep="")
+  cat(dec_three(accuracy), " \t \t",  sep="")
+  cat(dec_three(recall), " \t \t",  sep="")
+  cat(dec_three(specificity),  "\t\t",  sep="")
+  cat(dec_three(PPV), "\t \t",  sep="")
+  cat(dec_three(NPV),  "\t \t",  sep="")
+  cat(dec_three(prc_auc), "\t",  sep="")
   cat(dec_three(roc_auc), sep="",  "\n\n")
  
   #  resultsList <- list("MCC" = thisMcc, "F1 score" = f1_score, "accuracy" = accuracy, "TP rate" = recall, "TN rate" = specificity, "PR AUC" = prc_auc, "ROC AUC" = roc_auc)
 
-    NUM_METRICS <- 7
+    NUM_METRICS <- 9
     outputDataframe <- matrix(ncol=NUM_METRICS, nrow=1)
     outputDataframe[,1] <- thisMcc
     outputDataframe[,2] <- f1_score
     outputDataframe[,3] <- accuracy
     outputDataframe[,4] <- recall
     outputDataframe[,5] <- specificity
-    outputDataframe[,6] <- prc_auc
-    outputDataframe[,7] <- roc_auc
-    colnames(outputDataframe) <- c("MCC", "F1_score", "accuracy", "TP_rate", "TN_rate", "PR_AUC", "ROC_AUC")
+    outputDataframe[,6] <- PPV
+    outputDataframe[,7] <- NPV
+    outputDataframe[,8] <- prc_auc
+    outputDataframe[,9] <- roc_auc
+    colnames(outputDataframe) <- c("MCC", "F1_score", "accuracy", "TP_rate", "TN_rate", "PPV", "NPV", "PR_AUC", "ROC_AUC")
 
     return(outputDataframe)
 }

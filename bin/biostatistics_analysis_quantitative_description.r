@@ -3,6 +3,14 @@ options(stringsAsFactors = FALSE)
 cat("\014")
 set.seed(11)
 
+list.of.packages <- c("easypackages", "pastecs")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
+
+library("easypackages")
+libraries(list.of.packages)
+
+source("./confusion_matrix_rates.r")
 source("./utils.r")
 
 # tableAnalysis
@@ -57,8 +65,10 @@ tableAnalysis <- function(dataframe_patients)
 
 ## part to edit manually ##
 
-fileName <-   "../data/sepsis_severity_dataset_edited_2019-03-22.csv"
-targetName <- "Classification"
+# fileName <- "/home/davidechicco/my_projects/sepsis_survival_in_Norway/data/journal.pone.0187990.s002_EDITED_length_of_stay.csv"
+fileName <- "/home/davidechicco/my_projects/sepsis_survival_in_Norway/data/dataFrameForSurvival_study_cohort_rand2109.csv"
+# fileName <- "../data/journal.pone.0187990.s002_EDITED_length_of_stay_NORM_7510167.csv"
+targetName <- "hospital_outcome_1alive_0dead"
 ABNORMAL_TARGET_CONDITION <- 1
 NORMAL_TARGET_CONDITION <- 0
 
@@ -87,7 +97,7 @@ num_to_return <- 1
 upper_num_limit <- 10000000
 exe_num <- sample(1:upper_num_limit, num_to_return)
 
-LATEX_MODE <- FALSE
+LATEX_MODE <- TRUE
 
 LATEX_SEP <- "&"
 LATEX_END_OF_ROW <- "\\\\"
