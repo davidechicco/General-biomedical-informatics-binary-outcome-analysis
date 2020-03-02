@@ -25,6 +25,40 @@ scientificFormat <- function(var)
 }
 
 
+# isThisNumberInteger
+isThisNumberInteger <- function(num) {
+    return(num%%1==0)
+}
+
+# areAllNumbersIntegers
+areAllNumbersIntegers <- function(numArray)  {
+
+    for(i in numArray) {
+        if(isThisNumberInteger(i)==FALSE) return(FALSE)
+    }
+    return(TRUE)
+}
+
+# areAllContinuativeNumbersIntegers
+areAllContinuativeNumbersIntegers <- function(numArray)  {
+
+    sorteUndArray <- sort(unique(numArray))
+    maxValue <- summary(numArray)[[6]]
+    minValue <- summary(numArray)[[1]]
+
+    if(areAllNumbersIntegers(numArray)==FALSE) return(FALSE)
+    else if(maxValue > length(numArray)) return(FALSE)
+    else if(minValue > 1) return(FALSE) # there could be categories starting from 2, though
+    else {    
+        for(i in sorteUndArray) {
+            if(i >  length(numArray)) return(FALSE)
+        }
+    }
+    
+    return(TRUE)
+}
+
+
 
 SAVE_CORRELATIONS_PLOTS <- FALSE
 SAVE_CORRELATIONS_LISTS <- FALSE
@@ -99,8 +133,8 @@ mycols <- mycols[mycols!=TARGET_LABEL]
 alltests <- list()
 alltests[["MannWhitney_rank"]] <- alltests[["Kruskal"]] <- alltests[["Chi"]] <- alltests[["Anderson"]] <- list()
 for(thecol in mycols){
-    if(BINARY_TARGET_MODE) alltests[["MannWhitney_rank"]][[thecol]] <-  wilcox.test(as.formula(paste(thecol,TARGET_LABEL,sep="~")),     data=patients_dataset)
-    if(BINARY_TARGET_MODE==FALSE) alltests[["Kruskal"]][[thecol]] <-  kruskal.test(as.formula(paste(thecol,TARGET_LABEL,sep="~")),     data=patients_dataset)
+    alltests[["MannWhitney_rank"]][[thecol]] <-  wilcox.test(as.formula(paste(thecol,TARGET_LABEL,sep="~")),     data=patients_dataset)
+    alltests[["Kruskal"]][[thecol]] <-  kruskal.test(as.formula(paste(thecol,TARGET_LABEL,sep="~")),     data=patients_dataset)
     alltests[["Chi"]][[thecol]] <-     chisq.test(x=as.factor(patients_dataset[,thecol]),     y=patients_dataset[[TARGET_LABEL]],    simulate.p.value = TRUE)   
     
     if (ANDERSON_FLAG==FALSE) { 
@@ -139,7 +173,7 @@ if (ANDERSON_FLAG) {
 # cat("\n\n\t\t == MannWhitney_rank ==\n")
 vectorMannWhitney <- c()
 for(thecol in mycols) { 
-   if(BINARY_TARGET_MODE)  vectorMannWhitney[thecol] <- round(alltests[["MannWhitney_rank"]][[thecol]]$p.value, ROUND_NUM) 
+   vectorMannWhitney[thecol] <- round(alltests[["MannWhitney_rank"]][[thecol]]$p.value, ROUND_NUM) 
     
   #  cat(names((vectorMannWhitney)[thecol]), "\t \t \t", ((vectorMannWhitney)[[thecol]]), "\n")
 }
@@ -148,7 +182,7 @@ for(thecol in mycols) {
 # cat("\n\t\t == Kruskal ==\n")
 vectorKruskal <- c()
 for(thecol in mycols) { 
-   if(BINARY_TARGET_MODE==FALSE)  vectorKruskal[thecol] <- round(alltests[["Kruskal"]][[thecol]]$p.value, ROUND_NUM) 
+   vectorKruskal[thecol] <- round(alltests[["Kruskal"]][[thecol]]$p.value, ROUND_NUM) 
     
     # cat(names((vectorKruskal)[thecol]), "\t \t \t", ((vectorKruskal)[[thecol]]), "\n")
 }
@@ -215,12 +249,14 @@ if (ANDERSON_FLAG) {
 ASTE <- ""
 
 index <- 1
-if(BINARY_TARGET_MODE)  cat("\n\t\t == Mann-Whitney U test with target ", TARGET_LABEL, " ==\n", sep="")
+cat("\n\t\t == Mann-Whitney U test with target ", TARGET_LABEL, " ==\n", sep="")
 for(thecol in names(sortedVectorMannWhitney)) { 
     
    isThisFeatureBinary <-  is.binary(subset(patients_dataset[, c(names(sortedVectorMannWhitney)[index])], !is.na(patients_dataset[, c(names(sortedVectorMannWhitney)[index])])))
+   
+   isThisFeatureInteger <- areAllContinuativeNumbersIntegers(subset(patients_dataset[, c(names(sortedVectorMannWhitney)[index])], !is.na(patients_dataset[, c(names(sortedVectorMannWhitney)[index])])))
     
-    if(BINARY_TARGET_MODE==TRUE & isThisFeatureBinary==FALSE) { 
+    if(isThisFeatureBinary==FALSE & isThisFeatureInteger==FALSE) { 
     
             if( (sortedVectorMannWhitney)[[thecol]] < P_VALUE_THRESHOLD) ASTE <- "*"
     
@@ -232,13 +268,26 @@ for(thecol in names(sortedVectorMannWhitney)) {
 
 
 
-# index <- 1
-#  if(BINARY_TARGET_MODE==FALSE)  cat("\n\t\t == Kruskal-Wallis with target ", TARGET_LABEL, " ==\n", sep="")
-# for(thecol in names(sortedVectorKruskal)) { 
-#     
-#     if(BINARY_TARGET_MODE==FALSE) cat(index, " ", SEP," \t",  names((sortedVectorKruskal)[thecol]), " ", SEP," \t ", dec_three((sortedVectorKruskal)[[thecol]]), " ", END_OF_ROW," \n", sep="")
-#     index <- index + 1
-# }
+index <- 1
+ cat("\n\t\t == Kruskal-Wallis with target ", TARGET_LABEL, " ==\n", sep="")
+for(thecol in names(sortedVectorKruskal)) { 
+
+   isThisFeatureBinary <-  is.binary(subset(patients_dataset[, c(names(sortedVectorKruskal)[index])], !is.na(patients_dataset[, c(names(sortedVectorKruskal)[index])])))
+   
+   isThisFeatureInteger <- areAllContinuativeNumbersIntegers(subset(patients_dataset[, c(names(sortedVectorKruskal)[index])], !is.na(patients_dataset[, c(names(sortedVectorKruskal)[index])])))
+   
+   # cat("thecol isThisFeatureInteger\n")
+   # cat(thecol, " ",  isThisFeatureInteger, "\n", sep="")
+    
+     if(isThisFeatureBinary==FALSE & isThisFeatureInteger==TRUE) { 
+     
+        if( (sortedVectorChi)[[thecol]] < P_VALUE_THRESHOLD) ASTE <- "*"
+     
+        cat(index, " ", SEP," \t", ASTE,  names((sortedVectorKruskal)[thecol]), " ", SEP," \t ", scientificFormat((sortedVectorKruskal)[[thecol]]), " ", END_OF_ROW," \n", sep="")
+    }
+    index <- index + 1
+    ASTE <- ""
+}
 
 index <- 1
 cat("\n\t\t == chi squared with target ", TARGET_LABEL, " ==\n", sep="")
@@ -246,7 +295,7 @@ for(thecol in names(sortedVectorChi)) {
 
     isThisFeatureBinary <-  is.binary(subset(patients_dataset[, c(names(sortedVectorChi)[index])], !is.na(patients_dataset[, c(names(sortedVectorChi)[index])])))
     
-    if(BINARY_TARGET_MODE==TRUE & isThisFeatureBinary==TRUE) {     
+    if(isThisFeatureBinary==TRUE) {     
     
         if( (sortedVectorChi)[[thecol]] < P_VALUE_THRESHOLD) ASTE <- "*"
     
