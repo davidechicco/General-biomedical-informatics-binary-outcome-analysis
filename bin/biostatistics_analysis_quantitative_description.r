@@ -66,9 +66,11 @@ tableAnalysis <- function(dataframe_patients)
 ## part to edit manually ##
 
 # fileName <- "/home/davidechicco/my_projects/sepsis_survival_in_Norway/data/journal.pone.0187990.s002_EDITED_length_of_stay.csv"
-fileName <- "/home/davidechicco/my_projects/sepsis_survival_in_Norway/data/dataFrameForSurvival_study_cohort_rand2109.csv"
+# fileName <- "/home/davidechicco/my_projects/sepsis_survival_in_Norway/data/dataFrameForSurvival_study_cohort_rand2109.csv"
 # fileName <- "../data/journal.pone.0187990.s002_EDITED_length_of_stay_NORM_7510167.csv"
-targetName <- "hospital_outcome_1alive_0dead"
+
+fileName <- "/home/dave/hepatocellular_carcinoma/data/hcc-data_EDITED_NAs.csv"
+targetName <- "survival"
 ABNORMAL_TARGET_CONDITION <- 1
 NORMAL_TARGET_CONDITION <- 0
 

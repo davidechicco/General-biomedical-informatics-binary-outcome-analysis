@@ -6,15 +6,25 @@ set.seed(11)
 # Software originally developed by Giuseppe Jurman <jurman@fbk.eu> on 1st March 2019
 # Edited by Davide Chicco <davide.chicco@gmail.com> on 4th March 2019
 
-# /usr/bin/Rscript biostatistics_analysis_tests_Shapiro_Wilcoxon_Kruskal_ChiSquared.r "../data/patients_dataset.csv" "death_event"
+# /usr/bin/Rscript biostatistics_analysis_tests_Shapiro_MannWhitney_Kruskal_ChiSquared.r "../data/patients_dataset.csv" "death_event"
 
 # filename <- "../data/journal.pone.0187990.s002_EDITED_length_of_stay.csv"
 # TARGET_LABEL <- "length_of_stay_days"
 
-filename <- "../data/journal.pone.0187990.s002_EDITED_survival.csv"
-TARGET_LABEL <- "hospital_outcome_1alive_0dead"
+filename <- "/home/dave/hepatocellular_carcinoma/data/hcc-data_EDITED_NAs.csv"
+TARGET_LABEL <- "survival"
 
 resultsFolderPath = "../results/"
+
+P_VALUE_THRESHOLD <- 0.005
+
+# tableAnalysis
+scientificFormat <- function(var) 
+{
+    return(formatC(var, format = "e", digits = 3))
+}
+
+
 
 SAVE_CORRELATIONS_PLOTS <- FALSE
 SAVE_CORRELATIONS_LISTS <- FALSE
@@ -27,7 +37,7 @@ if (SAVE_CORRELATIONS_PLOTS == TRUE || SAVE_CORRELATIONS_LISTS==TRUE){
 
 # Data load
 
-list.of.packages <- c("readr", "easypackages", "nortest")
+list.of.packages <- c("readr", "easypackages", "nortest", "Information", "stats")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 library("easypackages")
@@ -87,9 +97,9 @@ survived_patients_data <-  patients_dataset[patients_dataset[[TARGET_LABEL]]==SU
 mycols <- names(patients_dataset)
 mycols <- mycols[mycols!=TARGET_LABEL]
 alltests <- list()
-alltests[["Wilcoxon_rank"]] <- alltests[["Kruskal"]] <- alltests[["Chi"]] <- alltests[["Anderson"]] <- list()
+alltests[["MannWhitney_rank"]] <- alltests[["Kruskal"]] <- alltests[["Chi"]] <- alltests[["Anderson"]] <- list()
 for(thecol in mycols){
-    if(BINARY_TARGET_MODE) alltests[["Wilcoxon_rank"]][[thecol]] <-  wilcox.test(as.formula(paste(thecol,TARGET_LABEL,sep="~")),     data=patients_dataset)
+    if(BINARY_TARGET_MODE) alltests[["MannWhitney_rank"]][[thecol]] <-  wilcox.test(as.formula(paste(thecol,TARGET_LABEL,sep="~")),     data=patients_dataset)
     if(BINARY_TARGET_MODE==FALSE) alltests[["Kruskal"]][[thecol]] <-  kruskal.test(as.formula(paste(thecol,TARGET_LABEL,sep="~")),     data=patients_dataset)
     alltests[["Chi"]][[thecol]] <-     chisq.test(x=as.factor(patients_dataset[,thecol]),     y=patients_dataset[[TARGET_LABEL]],    simulate.p.value = TRUE)   
     
@@ -126,14 +136,14 @@ if (ANDERSON_FLAG) {
 }
 
 
-# cat("\n\n\t\t == Wilcoxon_rank ==\n")
-vectorWilcoxon <- c()
+# cat("\n\n\t\t == MannWhitney_rank ==\n")
+vectorMannWhitney <- c()
 for(thecol in mycols) { 
-   if(BINARY_TARGET_MODE)  vectorWilcoxon[thecol] <- round(alltests[["Wilcoxon_rank"]][[thecol]]$p.value, ROUND_NUM) 
+   if(BINARY_TARGET_MODE)  vectorMannWhitney[thecol] <- round(alltests[["MannWhitney_rank"]][[thecol]]$p.value, ROUND_NUM) 
     
-  #  cat(names((vectorWilcoxon)[thecol]), "\t \t \t", ((vectorWilcoxon)[[thecol]]), "\n")
+  #  cat(names((vectorMannWhitney)[thecol]), "\t \t \t", ((vectorMannWhitney)[[thecol]]), "\n")
 }
-# print(vectorWilcoxon)
+# print(vectorMannWhitney)
 
 # cat("\n\t\t == Kruskal ==\n")
 vectorKruskal <- c()
@@ -155,11 +165,16 @@ for(thecol in mycols) {
 
 
 sortedVectorShapiro <- sort(vectorShapiro)
-sortedVectorAnderson <- sort(vectorAnderson)
-sortedVectorWilcoxon <- sort(vectorWilcoxon)
+
+if (ANDERSON_FLAG) {
+    sortedVectorAnderson <- sort(vectorAnderson)
+}
+
+sortedVectorMannWhitney <- sort(vectorMannWhitney)
 sortedVectorKruskal <- sort(vectorKruskal)
 sortedVectorChi <- sort(vectorChi)
 
+# print normal or LaTeX
 LATEX_MODE <- FALSE
 
 LATEX_SEP <- "&"
@@ -182,7 +197,7 @@ if (ANDERSON_FLAG==FALSE) {
     cat("\n\t\t == Shapiro-Wilk test ==\n")
     for(thecol in names(sortedVectorShapiro)) {    
         
-        cat(index, " ", SEP," \t",  names((sortedVectorShapiro)[thecol]), " ", SEP," \t ", ((sortedVectorShapiro)[[thecol]]), " ", END_OF_ROW," \n", sep="")
+        cat(index, " ", SEP," \t",  names((sortedVectorShapiro)[thecol]), " ", SEP," \t ", scientificFormat((sortedVectorShapiro)[[thecol]]), " ", END_OF_ROW," \n", sep="")
         index <- index + 1
     }
 }
@@ -192,34 +207,53 @@ if (ANDERSON_FLAG) {
     cat("\n\t\t == Anderson-Darling test ==\n")
     for(thecol in names(sortedVectorAnderson)) {    
         
-        cat(index, " ", SEP," \t",  names((sortedVectorAnderson)[thecol]), " ", SEP," \t ", ((sortedVectorAnderson)[[thecol]]), " ", END_OF_ROW," \n", sep="")
+        cat(index, " ", SEP," \t",  names((sortedVectorAnderson)[thecol]), " ", SEP," \t ", scientificFormat((sortedVectorAnderson)[[thecol]]), " ", END_OF_ROW," \n", sep="")
         index <- index + 1
     }
 }
 
+ASTE <- ""
 
 index <- 1
 if(BINARY_TARGET_MODE)  cat("\n\t\t == Mann-Whitney U test with target ", TARGET_LABEL, " ==\n", sep="")
-for(thecol in names(sortedVectorWilcoxon)) { 
+for(thecol in names(sortedVectorMannWhitney)) { 
     
-    if(BINARY_TARGET_MODE) cat(index, " ", SEP," \t",  names((sortedVectorWilcoxon)[thecol]), " ", SEP," \t ", ((sortedVectorWilcoxon)[[thecol]]), " ", END_OF_ROW," \n", sep="")
+   isThisFeatureBinary <-  is.binary(subset(patients_dataset[, c(names(sortedVectorMannWhitney)[index])], !is.na(patients_dataset[, c(names(sortedVectorMannWhitney)[index])])))
+    
+    if(BINARY_TARGET_MODE==TRUE & isThisFeatureBinary==FALSE) { 
+    
+            if( (sortedVectorMannWhitney)[[thecol]] < P_VALUE_THRESHOLD) ASTE <- "*"
+    
+            cat(index, " ", SEP," \t", ASTE,  names((sortedVectorMannWhitney)[thecol]), " ", SEP," \t ", scientificFormat((sortedVectorMannWhitney)[[thecol]]), " ", END_OF_ROW," \n", sep="")
+    }
     index <- index + 1
+    ASTE <- ""
 }
 
-index <- 1
- if(BINARY_TARGET_MODE==FALSE)  cat("\n\t\t == Kruskal-Wallis with target ", TARGET_LABEL, " ==\n", sep="")
-for(thecol in names(sortedVectorKruskal)) { 
-    
-    if(BINARY_TARGET_MODE==FALSE) cat(index, " ", SEP," \t",  names((sortedVectorKruskal)[thecol]), " ", SEP," \t ", ((sortedVectorKruskal)[[thecol]]), " ", END_OF_ROW," \n", sep="")
-    index <- index + 1
-}
+
+
+# index <- 1
+#  if(BINARY_TARGET_MODE==FALSE)  cat("\n\t\t == Kruskal-Wallis with target ", TARGET_LABEL, " ==\n", sep="")
+# for(thecol in names(sortedVectorKruskal)) { 
+#     
+#     if(BINARY_TARGET_MODE==FALSE) cat(index, " ", SEP," \t",  names((sortedVectorKruskal)[thecol]), " ", SEP," \t ", dec_three((sortedVectorKruskal)[[thecol]]), " ", END_OF_ROW," \n", sep="")
+#     index <- index + 1
+# }
 
 index <- 1
 cat("\n\t\t == chi squared with target ", TARGET_LABEL, " ==\n", sep="")
 for(thecol in names(sortedVectorChi)) { 
+
+    isThisFeatureBinary <-  is.binary(subset(patients_dataset[, c(names(sortedVectorChi)[index])], !is.na(patients_dataset[, c(names(sortedVectorChi)[index])])))
     
-     cat(index, " ", SEP," \t",  names((sortedVectorChi)[thecol]), " ", SEP," \t ", ((sortedVectorChi)[[thecol]]), " ", END_OF_ROW," \n", sep="")
-     index <- index + 1
+    if(BINARY_TARGET_MODE==TRUE & isThisFeatureBinary==TRUE) {     
+    
+        if( (sortedVectorChi)[[thecol]] < P_VALUE_THRESHOLD) ASTE <- "*"
+    
+        cat(index, " ", SEP," \t", ASTE,  names((sortedVectorChi)[thecol]), " ", SEP," \t ", scientificFormat((sortedVectorChi)[[thecol]]), " ", END_OF_ROW," \n", sep="")
+     }
+     index <- index + 1     
+     ASTE <- ""
 }
 
 # let's create the dataframes
@@ -229,9 +263,9 @@ for(thecol in names(sortedVectorChi)) {
 # dataframeShapiro$feature <- rownames(dataframeShapiro)
 
 if(BINARY_TARGET_MODE) {
-    dataframeWilkoxon <- as.data.frame(sortedVectorWilcoxon)
-    dataframeWilkoxon$pos <- c(1:dim(dataframeWilkoxon)[1])
-    dataframeWilkoxon$feature <- rownames(dataframeWilkoxon)
+    dataframeMannWhitney <- as.data.frame(sortedVectorMannWhitney)
+    dataframeMannWhitney$pos <- c(1:dim(dataframeMannWhitney)[1])
+    dataframeMannWhitney$feature <- rownames(dataframeMannWhitney)
 }
 
 if(BINARY_TARGET_MODE==FALSE) { 
@@ -252,7 +286,7 @@ if(SAVE_CORRELATIONS_PLOTS == TRUE) {
     # barPlotOfRanking(dataframeShapiro, abs(log(dataframeShapiro$"sortedVectorShapiro")), dataframeShapiro$feature, dataframeShapiro$pos, exe_num, "feature", "abs(log(Shapiro-Wilk))", x_upper_lim, resultsFolderPath)    
     
     #  x_upper_lim <- 1
-    # barPlotOfRanking(dataframeWilkoxon, dataframeWilkoxon$"sortedVectorWilcoxon", dataframeWilkoxon$feature, dataframeWilkoxon$pos, exe_num, "feature", "Wilcoxon", x_upper_lim, resultsFolderPath)
+    # barPlotOfRanking(dataframeMannWhitney, dataframeMannWhitney$"sortedVectorMannWhitney", dataframeMannWhitney$feature, dataframeMannWhitney$pos, exe_num, "feature", "MannWhitney", x_upper_lim, resultsFolderPath)
     
 #     x_upper_lim <- 1
 #     barPlotOfRanking(dataframeKruskal, dataframeKruskal$"sortedVectorKruskal", dataframeKruskal$feature, dataframeKruskal$pos, exe_num, "feature", "Kruskal", x_upper_lim, resultsFolderPath)
@@ -266,15 +300,15 @@ if(SAVE_CORRELATIONS_LISTS == TRUE){
 
     
     # tableFileShapiro <- paste0(resultsFolderPath,"Shapiro_",exe_num, ".csv")
-    tableFileWilcoxon <- paste0(resultsFolderPath,"Wilcoxon_",exe_num, ".csv")
+    tableFileMannWhitney <- paste0(resultsFolderPath,"MannWhitney_",exe_num, ".csv")
     tableFileKruskal <- paste0(resultsFolderPath,"Kruskal_",exe_num, ".csv")
     tableFileChiSquared <- paste0(resultsFolderPath,"chiSquared_",exe_num, ".csv")
 
 #    #  write.table(dataframeShapiro[,c(3,1)], file=tableFileShapiro, sep=",", col.names=TRUE, row.names=FALSE)
 #     cat("Saved file ", tableFileShapiro, "\n")
 #     
-#     # write.table(dataframeWilkoxon[,c(3,1)], file=tableFileWilcoxon, sep=",", col.names=TRUE, row.names=FALSE)
-#     # cat("Saved file ", tableFileWilcoxon, "\n")
+#     # write.table(dataframeMannWhitney[,c(3,1)], file=tableFileMannWhitney, sep=",", col.names=TRUE, row.names=FALSE)
+#     # cat("Saved file ", tableFileMannWhitney, "\n")
 #     
 #     write.table(dataframeKruskal[,c(3,1)], file=tableFileKruskal, sep=",", col.names=TRUE, row.names=FALSE)
 #     cat("Saved file ", tableFileKruskal, "\n")
