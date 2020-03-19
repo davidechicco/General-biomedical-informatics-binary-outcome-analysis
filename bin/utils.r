@@ -1,13 +1,30 @@
+setwd(".")
 options(stringsAsFactors = FALSE)
+cat("\014")
+# set.seed(11)
+options(repos = list(CRAN="http://cran.rstudio.com/"))
 
-list.of.packages <- c("easypackages", "ggplot2")
+list.of.packages <- c("easypackages", "ggplot2", "lubridate")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 
 library("easypackages")
 libraries(list.of.packages)
 
+# let's compute time
+global_start_time <- Sys.time()
 
+
+# computeExecutionTime
+computeExecutionTime <- function(){
+
+  thisEndTime <- Sys.time()
+  totalTime <- thisEndTime - global_start_time
+  cat("Total execution time: ", (totalTime)[[1]], " seconds\n", sep="")
+  
+  td <- seconds_to_period(totalTime)
+  cat(sprintf('%d days, %02d hours, %02d minutes, %02.2f seconds\n', day(td), td@hour, minute(td), second(td)))
+}
 
 
 # barplot of 

@@ -158,5 +158,5 @@ if (ALL_PATIENTS_CORRELATION == TRUE) {
 
 }
 
-
+computeExecutionTime()
 

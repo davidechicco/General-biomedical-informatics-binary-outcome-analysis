@@ -84,3 +84,4 @@ allExecutionsFinalRanking <- allExecutionsFinalRanking[order(-allExecutionsFinal
 allExecutionsFinalRanking$"finalPos" <- c(1:dim(allExecutionsFinalRanking)[1])
 
 print(allExecutionsFinalRanking[, c("finalOverall", "finalPos")])
+computeExecutionTime()

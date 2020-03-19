@@ -114,7 +114,7 @@ cat("Number of executions = ", execution_number, "\n", sep="")
 for(exe_i in 1:execution_number)
 {
 
-    cat("\n\n\n Execution number ", exe_i,"\n", sep="")
+    cat("[Execlution number ", exe_i, " out of ", execution_number, "]\n", sep="" )
     cat("[Randomizing the rows]\n")
     patients_data <- patients_data[sample(nrow(patients_data)),] # shuffle the rows
 
@@ -209,3 +209,4 @@ if (TWO_FEATURES_PLOT == TRUE) {
         dev.off()
 
 }
+computeExecutionTime()

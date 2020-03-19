@@ -366,3 +366,5 @@ if(SAVE_CORRELATIONS_LISTS == TRUE){
 #     cat("Saved file ", tableFileChiSquared, "\n")
 
 }
+
+computeExecutionTime()

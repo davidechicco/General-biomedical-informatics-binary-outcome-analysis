@@ -241,4 +241,4 @@ dataImputationFile <- paste0(datasetFileNameWithoutExtension, "_cosineDist_data_
 cat("The imputed dataset will be saved in the ", dataImputationFile, " file\n", sep="")
 write.csv(patients_data_new_imputed, file=dataImputationFile, row.names=TRUE)
 
-
+computeExecutionTime()

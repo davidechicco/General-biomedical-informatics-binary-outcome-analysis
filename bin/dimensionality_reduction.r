@@ -67,3 +67,4 @@ dimRedDatasetFile <- paste0(datasetFileNameWithoutExtension, "_dim", trunc ,"red
 cat("The dimensionality reduction dataset will be saved in the ", dimRedDatasetFile, " file\n", sep="")
 write.csv(dim_red_patients_dataset, file=dimRedDatasetFile, row.names=FALSE)
 
+computeExecutionTime()

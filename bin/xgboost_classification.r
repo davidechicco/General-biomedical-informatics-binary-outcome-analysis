@@ -42,6 +42,8 @@ cat("Number of executions = ", execution_number, "\n", sep="")
 for(exe_i in 1:execution_number)
 {
 
+    cat("[Execlution number ", exe_i, " out of ", execution_number, "]\n", sep="" )
+
     # shuffle the rows
     patients_data <- patients_data[sample(nrow(patients_data)),] 
 
@@ -93,12 +95,13 @@ for(exe_i in 1:execution_number)
     
  }
  
- cat("\n\n\n=== final results ===\n")
- 
- cat("Number of executions = ", execution_number, "\n", sep="")
- # statistics on the dataframe of confusion matrices
- statDescConfMatr <- stat.desc(confMatDataFrame)
-medianAndMeanRowResults <- (statDescConfMatr)[c("median", "mean"),]
-print(dec_three(medianAndMeanRowResults))
+cat("\n\n\n=== final results ===\n")
+cat("Number of executions = ", execution_number, "\n", sep="")
+
+# statistics on the dataframe of confusion matrices
+statDescConfMatr <- stat.desc(confMatDataFrame)
+# medianAndMeanRowResults <- (statDescConfMatr)[c("median", "mean"),]
+print(dec_three(statDescConfMatr))
 cat("\n\n=== === === ===\n")
+computeExecutionTime()
 

@@ -67,7 +67,7 @@ cat("Number of executions = ", execution_number, "\n", sep="")
 for(exe_i in 1:execution_number)
 {
 
-    cat("\n\n[Execution number ", exe_i," of the ",thisMethod,"]\n")
+    cat("[Execlution number ", exe_i, " out of ", execution_number, "]\n", sep="" )
 
     patients_data <- patients_data[sample(nrow(patients_data)),] # shuffle the rows again
  
@@ -104,3 +104,4 @@ allExecutionsFinalRanking <- allExecutionsFinalRanking[order(-allExecutionsFinal
 allExecutionsFinalRanking$"finalPos" <- c(1:dim(allExecutionsFinalRanking)[1])
 
 print(allExecutionsFinalRanking[, c("finalOverall", "finalPos")])
+computeExecutionTime()

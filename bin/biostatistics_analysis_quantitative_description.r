@@ -168,3 +168,5 @@ if(INDEP_YES_NO_QUANT_DESCRIPTION == TRUE)
     cat("\n\t\t\t>>> target NO patients \n", sep="")
     tableAnalysis(patients_data_target_no)
 }
+
+computeExecutionTime()

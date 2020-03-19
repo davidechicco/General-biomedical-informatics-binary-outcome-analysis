@@ -64,11 +64,11 @@ allFeaturesFormula <- as.formula(paste(as.factor(colnames(patients_data)[target_
 
 # cycle of executions
 
-execution_number <- 10
+execution_number <- 100
 cat("Number of executions = ", execution_number, "\n", sep="")
 for(exe_i in 1:execution_number)
 {
-
+    cat("[Execlution number ", exe_i, " out of ", execution_number, "]\n", sep="" )
     cat("[Randomizing the rows]\n")
     patients_data <- patients_data[sample(nrow(patients_data)),] # shuffle the rows
 
@@ -167,11 +167,12 @@ for(exe_i in 1:execution_number)
     
  }
  
- cat("\n\n\n=== final results ===\n")
- 
- cat("Number of executions = ", execution_number, "\n", sep="")
- # statistics on the dataframe of confusion matrices
- statDescConfMatr <- stat.desc(confMatDataFrame)
-medianAndMeanRowResults <- (statDescConfMatr)[c("median", "mean"),]
-print(dec_two(medianAndMeanRowResults))
+cat("\n\n\n=== final results ===\n")
+cat("Number of executions = ", execution_number, "\n", sep="")
+
+# statistics on the dataframe of confusion matrices
+statDescConfMatr <- stat.desc(confMatDataFrame)
+# medianAndMeanRowResults <- (statDescConfMatr)[c("median", "mean"),]
+print(dec_three(statDescConfMatr))
 cat("\n\n=== === === ===\n")
+computeExecutionTime()
