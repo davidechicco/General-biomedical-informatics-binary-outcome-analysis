@@ -5,31 +5,10 @@ set.seed(11)
 
 EXP_ARG_NUM <- 2
 
-# fileName <-  "/home/davide/projects/heart-failure-gene-expression-analysis/temp/patients_data_dataset_dim_red_svd5_file_1052379918.csv" 
-# targetName <- "diagnosis"
-
-# fileName <- "/home/davide/projects/heart-failure-gene-expression-analysis/data_preprocessed/STEMI_patients_data_heart_failure_1052379918_dimRed_47621531.csv"
-# targetName <- "added_diagnosis"
-
 TRAIN_SET_OVERSAMPLING_SYNTHETIC <- FALSE
 
-# args = commandArgs(trailingOnly=TRUE)
-# if (length(args)<EXP_ARG_NUM) {
-#   stop("At least two argument must be supplied (input files)", call.=FALSE)
-# } else {
-#   # default output file
-#   fileName <- args[1]
-#   targetName <- args[2]
-# }
-
-fileName <- "/home/davide/projects/AdvantagesOfMCC/data/neuroblastoma.csv"
-targetName <- "alive"
-
-# fileName <- "../data/dataset_edited_without_time.csv"
-# targetName <- "death_event"
-
-# fileName <- "../../../projects/sepsis_severity_ICU/data/sepsis_severity_dataset_edited_2019-02-11.csv"
-# targetName <- "ADDED.survival"
+ fileName <- "/home/davide/projects/arterial_events_and_IBD/data/journal.pone.0201991.s001_EDITED_event_type_binary.csv"
+ targetName <- "TARGET_type_0ACS_1stroke"
 
 cat("fileName: ", fileName, "\n", sep="")
 cat("targetName: ", targetName, "\n", sep="")
@@ -45,14 +24,15 @@ libraries(list.of.packages)
 source("./confusion_matrix_rates.r")
 source("./utils.r")
 
-NUM_METRICS <- 7
+NUM_METRICS <- 9
 confMatDataFrame <- matrix(ncol=NUM_METRICS, nrow=1)
-colnames(confMatDataFrame) <- c("MCC", "F1 score", "accuracy", "TP_rate", "TN_rate", "PR_AUC", "ROC_AUC")
+colnames(confMatDataFrame) <- c("MCC", "F1 score", "accuracy", "TP_rate", "TN_rate", "PPV", "NPV", "PR_AUC", "ROC_AUC")
 
 threshold <- 0.5
 
 patients_data <- read.csv(file=fileName,head=TRUE,sep=",",stringsAsFactors=FALSE)
 cat("fileName = ", fileName, "\n", sep="")
+
 
 # let's put the target label last on the right 
 patients_data <- patients_data%>%select(-targetName,targetName)
@@ -130,6 +110,8 @@ for(exe_i in 1:execution_number)
          
          # https://www.analyticsvidhya.com/blog/2016/03/practical-guide-deal-imbalanced-classification-problems/
          
+         cat("\ncheck\n")
+         
          if(TRAIN_SET_OVERSAMPLING_SYNTHETIC == TRUE)
          {
             thisP <- 0.5
@@ -172,7 +154,16 @@ cat("Number of executions = ", execution_number, "\n", sep="")
 
 # statistics on the dataframe of confusion matrices
 statDescConfMatr <- stat.desc(confMatDataFrame)
-# medianAndMeanRowResults <- (statDescConfMatr)[c("median", "mean"),]
+meanSigmaRowResults <- (statDescConfMatr)[c("mean","std.dev"),]
 print(dec_three(statDescConfMatr))
 cat("\n\n=== === === ===\n")
+print(dec_three(meanSigmaRowResults))
+cat("\n\n=== === === ===\n\n\n")
+
+printResultsLatex("Random forests", meanSigmaRowResults)
+
+#   cat("\t", colnames(meanSigmaRowResults), "\\\\ \n", sep=" & ")
+#     cat("mean ", as.character(dec_three((meanSigmaRowResults)["mean",])), sep=" & ")
+#     cat("$\\sigma$", as.character(dec_three((meanSigmaRowResults)["std.dev",])), "\\\\ \n", sep=" & ")
+
 computeExecutionTime()

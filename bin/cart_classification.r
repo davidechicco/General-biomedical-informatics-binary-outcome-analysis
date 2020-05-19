@@ -5,27 +5,16 @@ set.seed(11)
 
 EXP_ARG_NUM <- 2
 
-# fileName <-  "/home/davide/projects/breast_cancer_Coimbra/data/dataR2_EDITED.csv"
-# targetName <- "DIAGNOSIS"
 
-fileName <-  "/home/davide/projects/heart-failure-gene-expression-analysis/temp/patients_data_dataset_dim_red_svd5_file_1052379918.csv" 
-targetName <- "diagnosis"
+# fileName <- "/home/davide/projects/arterial_events_and_IBD/data/journal.pone.0201991.s001_EDITED_event_type_binary.csv"
+# targetName <- "TARGET_type_0ACS_1stroke"
 
-# args = commandArgs(trailingOnly=TRUE)
-# if (length(args)<EXP_ARG_NUM) {
-#   stop("At least two argument must be supplied (input files)", call.=FALSE)
-# } else {
-#   # default output file
-#   fileName <- args[1]
-#   targetName <- args[2]
-# }
+# fileName <-  "/home/davide/projects/heart-failure-gene-expression-analysis/temp/patients_data_dataset_dim_red_svd5_file_1052379918.csv" 
+# targetName <- "diagnosis"
 
 
-# fileName <- "../data/dataset_edited_without_time.csv"
-# targetName <- "death_event"
-
-# fileName <- "../../../projects/sepsis_severity_ICU/data/sepsis_severity_dataset_edited_2019-02-11.csv"
-# targetName <- "ADDED.survival"
+fileName <- "../../../projects/sepsis_severity_ICU/data/sepsis_severity_dataset_edited_2019-02-11.csv"
+targetName <- "ADDED.survival"
 
 cat("fileName: ", fileName, "\n", sep="")
 cat("targetName: ", targetName, "\n", sep="")
@@ -46,9 +35,9 @@ threshold <- 0.5
 patients_data <- read.csv(fileName, header = TRUE, sep =",");
 cat("Read data from file ", fileName, "\n", sep="")
 
-NUM_METRICS <- 7
+NUM_METRICS <- 9
 confMatDataFrame <- matrix(ncol=NUM_METRICS, nrow=1)
-colnames(confMatDataFrame) <- c("MCC", "F1 score", "accuracy", "TP rate", "TN rate", "PR AUC", "ROC AUC")
+colnames(confMatDataFrame) <- c("MCC", "F1 score", "accuracy", "TP_rate", "TN_rate", "PPV", "NPV", "PR_AUC", "ROC_AUC")
 
 # let's put the target label last on the right 
 patients_data <- patients_data%>%select(-targetName,targetName)
@@ -114,9 +103,13 @@ cat("Number of executions = ", execution_number, "\n", sep="")
 
 # statistics on the dataframe of confusion matrices
 statDescConfMatr <- stat.desc(confMatDataFrame)
-# medianAndMeanRowResults <- (statDescConfMatr)[c("median", "mean"),]
+meanAndSdRowResults <- (statDescConfMatr)[c("mean", "std.dev"),]
 print(dec_three(statDescConfMatr))
 cat("\n\n=== === === ===\n")
+
+
+printResultsLatex("Decision tree", meanAndSdRowResults)
+
 computeExecutionTime()
 
 

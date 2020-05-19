@@ -3,29 +3,13 @@ options(stringsAsFactors = FALSE)
 cat("\014")
 set.seed(11)
 
-EXP_ARG_NUM <- 2
-
-# fileName <-  "/home/davide/projects/heart-failure-gene-expression-analysis/temp/patients_data_dataset_dim_red_svd5_file_1052379918.csv" 
-# targetName <- "diagnosis"
-
-fileName <- "/home/davide/projects/heart-failure-gene-expression-analysis/temp/STEMI_patients_data_heart_failure_1052379918_dimRed_47621531.csv"
-targetName <- "added_diagnosis"
-
-# args = commandArgs(trailingOnly=TRUE)
-# if (length(args)<EXP_ARG_NUM) {
-#   stop("At least two argument must be supplied (input files)", call.=FALSE)
-# } else {
-#   # default output file
-#   fileName <- args[1]
-#   targetName <- args[2]
-# }
+# The dataset must be in a .csv file with patients on the rows and features on the column.
+# The first row must contain the column feauture names.
+# The last column on the right must contain the binary target
+fileName <- "/home/davide/projects/cardiovascular_heart_disease/data/dataset_edited_without_time.csv" # TO CHANGE
+targetName <- "death_event" #TO CHANGE
 
 
-# fileName <- "../data/dataset_edited_without_time.csv"
-# targetName <- "death_event"
-
-# fileName <- "../../../projects/sepsis_severity_ICU/data/sepsis_severity_dataset_edited_2019-02-11.csv"
-# targetName <- "ADDED.survival"
 
 cat("fileName: ", fileName, "\n", sep="")
 cat("targetName: ", targetName, "\n", sep="")
@@ -41,9 +25,9 @@ libraries(list.of.packages)
 source("./confusion_matrix_rates.r")
 source("./utils.r")
 
-NUM_METRICS <- 7
+NUM_METRICS <- 9
 confMatDataFrame <- matrix(ncol=NUM_METRICS, nrow=1)
-colnames(confMatDataFrame) <- c("MCC", "F1 score", "accuracy", "TP rate", "TN rate", "PR AUC", "ROC AUC")
+colnames(confMatDataFrame) <- c("MCC", "F1 score", "accuracy", "TP rate", "TN rate", "PPV", "NPV", "PR AUC", "ROC AUC")
 
 threshold <- 0.5
 
@@ -113,8 +97,11 @@ cat("Number of executions = ", execution_number, "\n", sep="")
 
 # statistics on the dataframe of confusion matrices
 statDescConfMatr <- stat.desc(confMatDataFrame)
-# medianAndMeanRowResults <- (statDescConfMatr)[c("median", "mean"),]
+meanAndSdRowResults <- (statDescConfMatr)[c("mean", "std.dev"),]
 print(dec_three(statDescConfMatr))
 cat("\n\n=== === === ===\n")
-computeExecutionTime()
 
+
+printResultsLatex("Linear regression", meanAndSdRowResults)
+
+computeExecutionTime()

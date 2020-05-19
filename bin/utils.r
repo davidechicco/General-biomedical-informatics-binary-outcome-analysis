@@ -14,16 +14,56 @@ libraries(list.of.packages)
 # let's compute time
 global_start_time <- Sys.time()
 
+# printResultsLatex
+printResultsLatex <- function(methodName, thisMeanSigmaRowResults){
+
+
+    cat("\nLaTeX table:\n\n\n")
+
+    cat("\t\\begin{table}[!httb] \\small
+            \\begin{tabularx}{\\textwidth}{l r l l l l l l l l l }
+             \\toprule\n", sep="")
+
+    cat("\t")
+    cat(methodName, "value", gsub("_", " ", colnames(thisMeanSigmaRowResults)), sep=" & ")
+    cat(" \\\\ \n")
+    cat("\t\\midrule\n")
+    cat("\t")
+    cat(methodName, "mean ", as.character(dec_three((thisMeanSigmaRowResults)["mean",])),  sep=" & ")
+    cat(" \\\\ \n")
+    cat("\t")
+    cat(methodName, "$\\sigma$", as.character(dec_three((thisMeanSigmaRowResults)["std.dev",])), sep=" & ")
+    cat(" \\\\ \n")
+    
+     cat("\t\\bottomrule 
+    \\end{tabularx} 
+    \\caption{\\textbf{Results of the binary classification made with machine learning classifiers, including standard deviation}.
+    MCC: Matthews correlation coefficient. 
+    MCC worst value $= -1$ and best value $= +1$. 
+    TP rate: true positive rate, sensitivity, recall. 
+    TN rate: true negative rate, specificity. 
+    PR: precision-recall curve. 
+    PPV: positive predictive value, precision. 
+    NPV: negative predictive value. 
+    ROC: receiver operating characteristic curve. 
+    AUC: area under the curve. 
+    F$_1$ score, accuracy, TP rate, TN rate, PPV, NPV, PR AUC, ROC AUC: worst value $= 0$ and best value $= +1$. 
+    We report the formulas of these rates in the Supplementary information. 
+    % We highligthed in \\blue blue \\black and with an asterisk * the top result for each statistical indicator. 
+    }\\label{tab:ML-RESULTS-BINARY-CLASSIFICATION-", toupper(gsub(" ", "-", methodName)) ,"} 
+    \\end{table} \n", sep="")
+
+}
 
 # computeExecutionTime
 computeExecutionTime <- function(){
 
   thisEndTime <- Sys.time()
   totalTime <- thisEndTime - global_start_time
-  cat("Total execution time: ", (totalTime)[[1]], " seconds\n", sep="")
+  cat("\nTotal execution time: ", (totalTime)[[1]], " seconds\n", sep="")
   
-  td <- seconds_to_period(totalTime)
-  cat(sprintf('%d days, %02d hours, %02d minutes, %02.2f seconds\n', day(td), td@hour, minute(td), second(td)))
+  td <-  as.period(difftime(Sys.time(), global_start_time)) #seconds_to_period(totalTime)
+  cat(sprintf('%d days, %02d hours, %02d minutes, %02.2f seconds\n\n', day(td), td@hour, minute(td), td$.Data))
 }
 
 

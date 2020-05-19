@@ -64,14 +64,12 @@ agregateTwoSortedRankings <- function(dd, firstColumnName, secondColumnName) {
 #   targetName <- args[2]
 # }
 
-fileNameData <-  "/home/davide/projects/breast_cancer_Coimbra/data/dataR2_EDITED.csv"
-targetName <- "DIAGNOSIS"
 
-# fileNameData <-  "/home/dave/cervical_cancer/cervical_arranged_NORM_ONLY_BIOPSY_TARGET.csv" 
-# targetName <- "Biopsy"
+# fileNameData <- "/home/davide/projects/arterial_events_and_IBD/data/journal.pone.0201991.s001_EDITED_binary_event.csv"
+# targetName <- "TARGET_arterial_event"
 
-# fileNameData<- "../data/dataset_edited_without_time.csv"
-# targetName <- "death_event"
+fileNameData <- "/home/davide/projects/arterial_events_and_IBD/data/journal.pone.0201991.s001_EDITED_event_type_binary.csv"
+targetName <- "TARGET_type_0ACS_1stroke"
 
 list.of.packages <- c("easypackages", "randomForest", "ggplot2", "dplyr")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]

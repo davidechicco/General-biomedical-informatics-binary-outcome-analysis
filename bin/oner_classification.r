@@ -18,9 +18,9 @@ libraries(list.of.packages)
 source("./confusion_matrix_rates.r")
 source("./utils.r")
 
-NUM_METRICS <- 7
+NUM_METRICS <- 9
 confMatDataFrame <- matrix(ncol=NUM_METRICS, nrow=1)
-colnames(confMatDataFrame) <- c("MCC", "F1 score", "accuracy", "TP rate", "TN rate", "PR AUC", "ROC AUC")
+colnames(confMatDataFrame) <- c("MCC", "F1 score", "accuracy", "TP_rate", "TN_rate", "PPV", "NPV", "PR_AUC", "ROC_AUC")
 
 
 threshold <- 0.5
@@ -91,9 +91,13 @@ cat("Number of executions = ", execution_number, "\n", sep="")
 
 # statistics on the dataframe of confusion matrices
 statDescConfMatr <- stat.desc(confMatDataFrame)
-# medianAndMeanRowResults <- (statDescConfMatr)[c("median", "mean"),]
+meanAndSdRowResults <- (statDescConfMatr)[c("mean", "std.dev"),]
 print(dec_three(statDescConfMatr))
 cat("\n\n=== === === ===\n")
+
+
+printResultsLatex("One rule", meanAndSdRowResults)
+
 computeExecutionTime()
 
 
