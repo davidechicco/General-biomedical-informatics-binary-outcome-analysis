@@ -1,15 +1,35 @@
 options(stringsAsFactors = FALSE)
 # library("clusterSim")
 
-list.of.packages <- c("easypackages", "PRROC", "e1071", "Metrics", "MLmetrics")
+list.of.packages <- c("easypackages", "PRROC", "e1071", "Metrics", "MLmetrics", "rcompanion", "irr" )
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 
 library("easypackages")
 libraries(new.packages)
-script_dir <- dirname(sys.frame(1)$ofile)
-cat("script_dir: ", script_dir, "\n", sep="")
-source(paste0(script_dir,"/utils.r"))
+# script_dir <- dirname(sys.frame(1)$ofile)
+# cat("script_dir: ", script_dir, "\n", sep="")
+source("utils.r")
+
+
+# Brier score
+Cohen_Kappa_function <- function(actual_labels, predicted_values) 
+{
+    ground_and_pred <- data.frame(actual_labels = as.numeric(actual_labels), predicted_values = as.numeric(predicted_values))
+    thisCohenKappa <- kappa2(ground_and_pred)
+    cat("Cohen's kappa = ", dec_three(thisCohenKappa$value), " (worst value: -1; best value: +1)\n")
+
+    return(thisCohenKappa)
+}
+
+# Brier score
+Brier_score_function <- function(actual_labels, predicted_values) 
+{
+    this_Brier_score <- sum((predicted_values - actual_labels)^2) / length(predicted_values)
+    cat("Brier score = ", dec_three(this_Brier_score), " (best value: 0; worst value: 1)\n")
+
+    return(this_Brier_score)
+}
 
 # regression rates
 regression_rates <- function(actual_labels, predicted_values, keyword)
@@ -59,6 +79,11 @@ confusion_matrix_rates <- function (actual_labels, predicted_values, keyword)
     roc_auc <- roc_curve_test$auc
     cat("ROC AUC \t\t", roc_auc, "\n\n", sep="")
 
+    theBrierScore <- Brier_score_function(actual_labels, predicted_values)
+    theCohenKappa <- Cohen_Kappa_function(actual_labels, predicted_values)
+    theCramerV <- cramerV(ground_truth, binary_prediction)
+    cat("Cramer's V = ", dec_three(theCramerV[[1]]), " (worst value: 0; best value: 1)\n",  sep="")
+
     predicted_values_binary <- as.numeric(predicted_values)
     predicted_values_binary[predicted_values_binary>=threshold]=1
     predicted_values_binary[predicted_values_binary<threshold]=0
@@ -70,7 +95,6 @@ confusion_matrix_rates <- function (actual_labels, predicted_values, keyword)
   TN <- sum(actual == 0 & predicted == 0)
   FP <- sum(actual == 0 & predicted == 1)
   FN <- sum(actual == 1 & predicted == 0)
-  
   
   cat("\nTOTAL:\n\n")
   cat(" FN = ", (FN), " / ", (FN+TP), "\t (truth == 1) & (prediction < threshold)\n");
