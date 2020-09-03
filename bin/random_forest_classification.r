@@ -39,6 +39,8 @@ patients_data <- patients_data%>%select(-targetName,targetName)
 target_index <- dim(patients_data)[2]    
 patients_data_original <- patients_data
 
+patients_data[,target_index] <- as.factor(patients_data[,target_index])
+
 # formula
 allFeaturesFormula <- as.formula(paste(as.factor(colnames(patients_data)[target_index]), '.', sep=' ~ ' ))
 
@@ -137,10 +139,10 @@ for(exe_i in 1:execution_number)
     cat("\n[Training the random forest classifier on the training set]\n")
 
     rf_new <- NULL
-    rf_new <- randomForest(allFeaturesFormula, data=patients_data_train, importance=TRUE, proximity=TRUE)
+    rf_new <- randomForest(allFeaturesFormula, data=patients_data_train, importance=FALSE, proximity=TRUE)
     
     cat("\n[Applying the trained random forest classifier on the test set]\n")
-    patients_data_test_PRED <- predict(rf_new, patients_data_test, type="response")
+    patients_data_test_PRED <- predict(rf_new, patients_data_test, type="prob")[,"1"]
 
     thisConfMat <- confusion_matrix_rates(patients_data_test_labels, patients_data_test_PRED, "@@@ Test set @@@")
     
