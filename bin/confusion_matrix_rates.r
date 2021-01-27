@@ -3,7 +3,7 @@ options(stringsAsFactors = FALSE)
 
 list.of.packages <- c("easypackages", "PRROC", "e1071", "Metrics", "MLmetrics", "rcompanion", "irr" )
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
-if(length(new.packages)) install.packages(new.packages)
+if(length(new.packages)) install.packages(new.packages, repos='http://cran.us.r-project.org')
 
 library("easypackages")
 libraries(new.packages)
@@ -35,25 +35,28 @@ Brier_score_function <- function(actual_labels, predicted_values)
 regression_rates <- function(actual_labels, predicted_values, keyword)
 {
 
-    thisRMSE <- rmse(actual_labels, predicted_values)
-    thisMAE <- mae(actual_labels, predicted_values)
-    thisMSE <- mse(actual_labels, predicted_values)
-    thisSMAPE <- smape(actual_labels, predicted_values)
+    thisRMSE <- Metrics::rmse(actual_labels, predicted_values)
+    thisMAE <- Metrics::mae(actual_labels, predicted_values)
+    thisMSE <- Metrics::mse(actual_labels, predicted_values)
+    thisSMAPE <- Metrics::smape(actual_labels, predicted_values)
+    thisMAPE <- Metrics::mape(actual_labels, predicted_values)
     
     thisR2score <- MLmetrics::R2_Score(predicted_values, actual_labels) # (predicted_values, actual_labels) # notice the swap
     # R2_Score(y_pred, y_true)
 
-    cat("  @@@ regression :: \t RMSE \t MAE \t MSE  \t SMAPE \t R^2 \n")
-    cat("  @@@ regression :: \t ", dec_three(thisRMSE), " \t ", dec_three(thisMAE), " \t ", dec_three(thisMSE),  " \t ", dec_three(thisSMAPE),  " \t ", dec_three(thisR2score)," \n", sep="")
+    cat("  @@@ regression :: \t R^2 \t RMSE \t MAE \t MSE  \t SMAPE \t MAPE \n")
+    cat("  @@@ regression ::   ", dec_three(thisR2score), "\t" , dec_three(thisRMSE), " \t ", dec_three(thisMAE), " \t ", dec_three(thisMSE),  " \t ", dec_three(thisSMAPE),  " \t ", dec_three(thisMAPE)," \n", sep="")
+    cat("  @@@ regression ::  (-∞, +1]  [0, +∞)  [0, +∞) [0, +∞)  [0, 2]  [0, +∞) \n")
     
-    NUM_METRICS <- 5
+    NUM_METRICS <- 6
     outputDataframe <- matrix(ncol=NUM_METRICS, nrow=1)
-    outputDataframe[,1] <- thisRMSE
-    outputDataframe[,2] <- thisMAE
-    outputDataframe[,3] <- thisMSE
-    outputDataframe[,4] <- thisSMAPE
-    outputDataframe[,5] <- thisR2score
-    colnames(outputDataframe) <- c("RMSE", "MAE", "MSE", "SMAPE", "R^2")
+    outputDataframe[,1] <- thisR2score
+    outputDataframe[,2] <- thisRMSE
+    outputDataframe[,3] <- thisMAE
+    outputDataframe[,4] <- thisMSE
+    outputDataframe[,5] <- thisSMAPE
+    outputDataframe[,6] <- thisMAPE
+    colnames(outputDataframe) <- c("R^2", "RMSE", "MAE", "MSE", "SMAPE", "MAPE")
 
     return(outputDataframe)
 }
