@@ -13,6 +13,10 @@ sys.execute(mkdirResultsCommand)
 print("executed "..mkdirModelsCommand.."\n")
 print("executed "..mkdirResultsCommand.."\n")
 
+rmModelsCommand = 'rm -r models/*'
+sys.execute(rmModelsCommand)
+print("executed "..rmModelsCommand.."\n")
+
 -- global
 global_lastMCC = {}
 global_lastAccuracy =  {}
@@ -21,11 +25,23 @@ global_lastTPrate =  {}
 global_lastTNrate =  {}
 global_lastROCAUC =  {}
 global_lastPRAUC =  {}
+global_lastPPV =  {}
+global_lastNPV =  {}
+
+torch.manualSeed(11)
 
 
 MAX_MSE = 4
 
 local timeStart = os.time()
+
+
+-- dec_three()
+function dec_three(real_value)
+    
+    return round(real_value, 3);
+    
+end
 
 -- createPerceptron
 function createPerceptron(this_input_number, this_hidden_units, this_hidden_layers, this_output_number)
@@ -117,13 +133,15 @@ function executeTest(testPerceptron, dataset_patient_profile)
     thisF1score = output_confusion_matrix[5]
     thisTPrate = output_confusion_matrix[6]
     thisTNrate = output_confusion_matrix[7]
-    print("#output_confusion_matrix = "..(#output_confusion_matrix).."\n")
+    thisPPV = output_confusion_matrix[8]
+    thisNPV = output_confusion_matrix[9]
+    print("\n#output_confusion_matrix = "..(#output_confusion_matrix).."\n")
     
-    print("@@@ MCC  F1_score  accuracy  TP_rate  TN_rate  PR_AUC  ROC_AUC")
-    print("@@@ "..round(thisMCC,2).."    "..round(thisF1score,2).."    "..round(thisAccuracy,2).."        "..round(thisTPrate,2).."    "..round(thisTNrate,2).."     "..round(thisPRAUC,2).." \t "..round(thisROCAUC,2).."\n")
+    print("@@@ MCC  F1_score  accuracy  TP_rate  TN_rate PPV NPV  PR_AUC  ROC_AUC")
+    print("@@@ "..round(thisMCC,2).."    "..round(thisF1score,2).."    "..round(thisAccuracy,2).."        "..round(thisTPrate,2).."    "..round(thisTNrate,2).."        "..round(thisPPV,2).."    "..round(thisNPV,2).."     "..round(thisPRAUC,2).." \t "..round(thisROCAUC,2).."\n")
     
 
-    return {thisMCC, thisAccuracy, thisF1score, thisTPrate, thisTNrate, thisROCAUC, thisPRAUC}; 
+    return {thisMCC, thisAccuracy, thisF1score, thisTPrate, thisTNrate, thisROCAUC, thisPRAUC, thisPPV, thisNPV}; 
 end
 
 
@@ -142,6 +160,31 @@ function table.contains(table, element)
   end
   return {false,-1}
 end
+
+
+-- stats_standardDeviation()
+function stats_standardDeviation( t )
+  local m
+  local vm
+  local sum = 0
+  local count = 0
+  local result
+
+  m = stats_mean( t )
+
+  for k,v in pairs(t) do
+    if type(v) == 'number' then
+      vm = v - m
+      sum = sum + (vm * vm)
+      count = count + 1
+    end
+  end
+
+  result = math.sqrt(sum / (count-1))
+
+  return result
+end
+
 
 -- Function that prints 
 function printTime(timeStart, stringToPrint)
@@ -205,6 +248,8 @@ function confusion_matrix(predictionTestVect, truthVect, threshold, printValues)
   local f1_score = -2
   local tp_rate = -2
   local tn_rate = -2
+  local ppv = -2
+  local npv = -2
   
   
   local fpRateVett = {}
@@ -264,35 +309,51 @@ function confusion_matrix(predictionTestVect, truthVect, threshold, printValues)
       -- else print("Matthews correlation coefficient = NOT computable");	end
       
       accuracy = (tp + tn)/(tp + tn +fn + fp)
-      print("accuracy = "..round(accuracy,2).. " = (tp + tn) / (tp + tn +fn + fp) \t  \t [worst = -1, best =  +1]");
+      print("accuracy = "..dec_three(accuracy));
       
       f1_score = -2
       if (tp+fp+fn)>0 then   
         f1_score = (2*tp) / (2*tp+fp+fn)
-        print("f1_score = "..round(f1_score,2).." = (2*tp) / (2*tp+fp+fn) \t [worst = 0, best = 1]");
+        print("F1 score = "..dec_three(f1_score));
       else
-        print("f1_score CANNOT be computed because (tp+fp+fn)==0")    
+        print("F1 score CANNOT be computed because (tp+fp+fn)==0")    
       end
       
       tp_rate = -2
       if (tp+fn)>0 then   
         tp_rate = (tp) / (tp+fn)
-        print("TP rate = "..round(tp_rate,2).." = TP rate = tp / (tp+fn) \t [worst = 0, best = 1]");
+        print("TPR = "..dec_three(tp_rate))
       else
-        print("TP rate CANNOT be computed because (tp+fn)==0")    
+        print("TPR rate CANNOT be computed because (tp+fn)==0")    
       end
       
       tn_rate = -2
       if (tn+fp)>0 then   
         tn_rate = (tn) / (tn+fp)
-        print("TN rate = "..round(tn_rate,2).." = TN rate = tn / (tn+fp) \t [worst = 0, best = 1]");
+        print("TNR = "..dec_three(tn_rate))
       else
-        print("TN rate CANNOT be computed because (tn+fp)==0")    
+        print("TNR CANNOT be computed because (tn+fp)==0")    
+      end
+      
+        ppv = -2
+      if (tp+fn)>0 then   
+        ppv = (tp) / (tp+fp)
+        print("PPV = "..dec_three(ppv))
+      else
+        print("PPV CANNOT be computed because (tp+fp)==0")    
+      end
+      
+      npv = -2
+      if (tn+fn)>0 then   
+        npv = (tn) / (tn+fn)
+        print("NPV = "..dec_three(npv))
+      else
+        print("NPV rate CANNOT be computed because (tn+fn)==0")    
       end
 	
     end
     
-    return {accuracy, arrayFPindices, arrayFPvalues, MatthewsCC, f1_score, tp_rate, tn_rate};
+    return {accuracy, arrayFPindices, arrayFPvalues, MatthewsCC, f1_score, tp_rate, tn_rate, ppv, npv};
 end
 
 
@@ -325,7 +386,7 @@ local profile_vett = {}
 local csv = require("csv")
 --local fileName = tostring("/home/davide/projects/cardiovascular_heart_disease/data/dataset_edited_without_time_NORM.csv")
 
-local fileName = tostring("/home/davide/projects/heart-failure-gene-expression-analysis/temp/STEMI_patients_data_heart_failure_without_controls9013975_5dimRed_370671003_NORM_8199309.csv")
+local fileName = tostring("../data/10.1371_journal.pone.0221502_glioblastoma_dataset_without_PFS.csv")
 
 
 
@@ -358,19 +419,29 @@ for fields in f:lines() do
   end
 end
 
-OPTIM_PACKAGE = true
+OPTIM_PACKAGE = false
 NORMALIZATION = false
 MAX_VALUE = 1
 local output_number = 1
 THRESHOLD = 0.5 -- ORIGINAL
 -- THRESHOLD = 0.1529
-XAVIER_INITIALIZATION = false
-DROPOUT_FLAG = false 
 MOMENTUM_ALPHA = 0.5
 
-MOMENTUM = false
-LEARN_RATE = 0.15 -- 0.01
-ITERATIONS = 10000 -- 500
+MOMENTUM = true
+XAVIER_INITIALIZATION = false
+DROPOUT_FLAG = false 
+
+LEARN_RATE =  0.001 -- 0.01   
+ITERATIONS = 10000 -- 10000
+
+-- Table to hold statistical functions
+stats={}
+
+print("MOMENTUM = "..tostring(MOMENTUM))
+print("XAVIER_INITIALIZATION = "..tostring(XAVIER_INITIALIZATION))
+print("DROPOUT_FLAG = "..tostring(DROPOUT_FLAG))
+print("LEARN_RATE = "..LEARN_RATE)
+print("ITERATIONS = "..ITERATIONS)
 
 -- LEARN_RATE = 0.01
 -- local hidden_units = 50
@@ -378,10 +449,10 @@ ITERATIONS = 10000 -- 500
 -- ITERATIONS = 200
 
 -- local hidden_layers = 1 -- best is 1
-local hiddenUnitVect = {5, 10, 25,50,75,100}--,125,150,175,200,225,250,275,300}
+local hiddenUnitVect = {2, 3, 4, 5, 10, 25,50,75,100}--,125,150,175,200,225,250,275,300}
 -- local hiddenUnitVect = {5, 10, 25, 35, 50, 75, 100}
--- local hiddenLayerVect = {1}
- local hiddenLayerVect = {1} --, 2,3}--,4,5}
+local hiddenLayerVect = {1}
+-- local hiddenLayerVect = {1, 2,3,4,5}
 
 local max_values = {}
 
@@ -442,8 +513,7 @@ local patients_vett = profile_vett_data
 local timeStart = os.time();
 
 local indexVect = {}; 
-for i=1, #patients_vett do indexVect[i] = i;  end
-permutedIndexVect = permute(indexVect, #indexVect, #indexVect);
+
 
 -- -- VALIDATION_SET_PERC = 20
 -- -- TEST_SET_SIZE = 65
@@ -471,9 +541,12 @@ print("TEST_SET_SIZE = "..TEST_SET_SIZE.." elements\n");
 
 
 -- start of the application
-execution_number = 2
+execution_number = 10
 
 for exe=1,execution_number do
+    
+        for i=1, #patients_vett do indexVect[i] = i;  end
+        permutedIndexVect = permute(indexVect, #indexVect, #indexVect);
 
         print("\n\n\n[execution number = "..exe.."]\n");
     
@@ -536,7 +609,10 @@ for exe=1,execution_number do
             local perceptron = createPerceptron(input_number, hidden_units, hidden_layers, output_number)
 
 
-            local criterion = nn.MSECriterion()  
+            -- local criterion = nn.MSECriterion()  -- MCC = 0.36 +- 0.75
+            -- local criterion = nn.AbsCriterion()  -- MCC = 0.309 +- 0.094
+            local criterion = nn.SmoothL1Criterion()  -- MCC = 0.382 +- 0.045
+            -- local criterion = nn.DistKLDivCriterion() -- MCC = undefined
             local lossSum = 0
             local positiveLossSum = 0
             local error_progress = 0
@@ -545,6 +621,8 @@ for exe=1,execution_number do
 
 
             if OPTIM_PACKAGE == false then
+                
+            print("OPTIM_PACKAGE is false\n")
 
             myTrainer = nn.StochasticGradient(perceptron, criterion)
             myTrainer.learningRate = LEARN_RATE
@@ -552,6 +630,8 @@ for exe=1,execution_number do
             myTrainer:train(train_patient_profile)
             
             else
+                
+            print("OPTIM_PACKAGE is true\n")
             
             require 'optim'
             local params, gradParams = perceptron:getParameters()     
@@ -667,6 +747,8 @@ for exe=1,execution_number do
         local lastTNrate = executeTestOutput[5]
         local lastROCAUC = executeTestOutput[6]
         local lastPRAUC = executeTestOutput[7]
+        local lastPPV = executeTestOutput[8]
+        local lastNPV = executeTestOutput[9]
         
         global_lastMCC[exe] = lastMCC
         global_lastAccuracy[exe] = lastAccuracy
@@ -675,8 +757,10 @@ for exe=1,execution_number do
         global_lastTNrate[exe] = lastTNrate
         global_lastROCAUC[exe] = lastROCAUC
         global_lastPRAUC[exe] = lastPRAUC        
+        global_lastPPV[exe] = lastPPV
+        global_lastNPV[exe] = lastNPV        
 
-        print("':':':':' lastMCC = "..round(lastMCC,3).."  lastAccuracy = "..round(lastAccuracy,3).." ':':':':'")
+        print("':':':':' lastMCC = "..round(lastMCC,3).."  ':':':':'")
 
 
 end
@@ -709,15 +793,39 @@ TPrate_exe_mean = stats_mean(global_lastTPrate)
 TNrate_exe_mean = stats_mean(global_lastTNrate)
 ROCAUC_exe_mean = stats_mean(global_lastROCAUC)
 PRAUC_exe_mean = stats_mean(global_lastPRAUC)
+PPV_exe_mean = stats_mean(global_lastPPV)
+NPV_exe_mean = stats_mean(global_lastNPV)
+
+MCC_exe_sd = stats_standardDeviation(global_lastMCC)
+accuracy_exe_sd = stats_standardDeviation(global_lastAccuracy)
+F1score_exe_sd = stats_standardDeviation(global_lastF1score)
+TPrate_exe_sd = stats_standardDeviation(global_lastTPrate)
+TNrate_exe_sd = stats_standardDeviation(global_lastTNrate)
+ROCAUC_exe_sd = stats_standardDeviation(global_lastROCAUC)
+PRAUC_exe_sd = stats_standardDeviation(global_lastPRAUC)
+PPV_exe_sd = stats_standardDeviation(global_lastPPV)
+NPV_exe_sd = stats_standardDeviation(global_lastNPV)
+
 
 ROUND_NUM = 3
 
 print("\n\n~~~ average values of "..execution_number.." executions ")
-print("~~~ MCC  F1_score  accuracy  TP_rate  TN_rate  PR_AUC  ROC_AUC")
-print("~~~ "..round(MCC_exe_mean, ROUND_NUM).."    "..round(F1score_exe_mean, ROUND_NUM).."    "..round(accuracy_exe_mean, ROUND_NUM).."        "..round(TPrate_exe_mean, ROUND_NUM).."    "..round(TNrate_exe_mean, ROUND_NUM).."     "..round((ROCAUC_exe_mean/100), ROUND_NUM).." \t "..round((PRAUC_exe_mean/100), ROUND_NUM).."\n")
+print("~~~ MCC  F1_score  accuracy  TP_rate  TN_rate PPV NPV PR_AUC  ROC_AUC")
+print("~~~ "..round(MCC_exe_mean, ROUND_NUM).."    "..round(F1score_exe_mean, ROUND_NUM).."    "..round(accuracy_exe_mean, ROUND_NUM).."        "..round(TPrate_exe_mean, ROUND_NUM).."    "..round(TNrate_exe_mean, ROUND_NUM).."     "..round(PPV_exe_mean, ROUND_NUM).."    "..round(NPV_exe_mean, ROUND_NUM).."     "..round((ROCAUC_exe_mean/100), ROUND_NUM).." \t "..round((PRAUC_exe_mean/100), ROUND_NUM).."\n")
+
+print("\n\n~~~ std dev values of "..execution_number.." executions ")
+print("~~~ MCC  F1_score  accuracy  TP_rate  TN_rate PPV NPV  PR_AUC  ROC_AUC")
+print("~~~ "..round(MCC_exe_sd, ROUND_NUM).."    "..round(F1score_exe_sd, ROUND_NUM).."    "..round(accuracy_exe_sd, ROUND_NUM).."        "..round(TPrate_exe_sd, ROUND_NUM).."    "..round(TNrate_exe_sd, ROUND_NUM).."          "..round(PPV_exe_sd, ROUND_NUM).."    "..round(NPV_exe_sd, ROUND_NUM).."     "..round((ROCAUC_exe_sd/100), ROUND_NUM).." \t "..round((PRAUC_exe_sd/100), ROUND_NUM).."\n")
+
 
 rmModelsCommand = 'rm -r models/*'
 sys.execute(rmModelsCommand)
 print("executed "..rmModelsCommand.."\n")
+
+print("MOMENTUM = "..tostring(MOMENTUM))
+print("XAVIER_INITIALIZATION"..tostring(XAVIER_INITIALIZATION))
+print("DROPOUT_FLAG = "..tostring(DROPOUT_FLAG))
+print("LEARN_RATE = "..LEARN_RATE)
+print("ITERATIONS = "..ITERATIONS)
 
 printTime(timeStart, " complete execution")
